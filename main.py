@@ -232,15 +232,11 @@ class Kocka:
 class Hra:
     """Hlavní herní třída, která řídí celý průběh hry."""
 
-    def __init__(self, level=0):
+    def __init__(self):
         """Inicializace hry – vytvoří okno, načte textury, připraví herní objekty."""
         self.okno = pygame.display.set_mode((SIRKA, VYSKA))
         pygame.display.set_caption(NAZEV_HRY)
         self.hodiny = pygame.time.Clock()
-
-        # Aktuální level
-        self.aktualni_level = level
-        self.data_levelu = LEVELY[level]
 
         # Načtení textur
         self.textury = self._nacti_textury()
@@ -270,7 +266,7 @@ class Hra:
         self._aktualizuj_pozadi()
 
     def _nacti_textury(self):
-        """Načte všechny textury ze složky assets/ (pro všechny levely najednou)."""
+        """Načte všechny textury ze složky assets/."""
         textury = {}
         soubory = {
             "cat":         "cat.png",
@@ -354,15 +350,9 @@ class Hra:
             if udalost.type == pygame.KEYDOWN:
                 if udalost.key == pygame.K_ESCAPE:
                     return False
-                # Přechod na další level
-                if self.stav == "prechod_levelu" and udalost.key in (
-                    pygame.K_r, pygame.K_RETURN, pygame.K_SPACE
-                ):
-                    self.__init__(self.aktualni_level + 1)
-                    return True
-                # Restart hry od začátku po výhře
+                # Restart hry po výhře
                 if self.stav == "vyhra" and udalost.key == pygame.K_r:
-                    self.__init__(0)
+                    self.__init__()
                     return True
                 # Přechod na další level po stisknutí libovolné klávesy
                 if self.stav == "prechod_levelu":
@@ -388,8 +378,7 @@ class Hra:
             if vzdalenost < prah_kolize:
                 if self.kocka.muze_snizt(obj):
                     snedeno.append(obj)
-                    rust = self.data_levelu["rust"].get(obj.nazev, 5)
-                    self.kocka.snezt(rust)
+                    self.kocka.snezt(obj)
                     self.zprava_snezeni = "Snědena: " + obj.nazev + "!"
                     self.cas_zpravy = 120  # 2 sekundy při 60 FPS
 
@@ -440,13 +429,13 @@ class Hra:
         self.okno.blit(text_level, (15, 12))
 
         # Počet snědených objektů
-        text_snezeno = self.font_maly.render(
+        text_snezeno = self.font_stredni.render(
             "Snězeno: " + str(self.kocka.snedeno), True, BILA
         )
         self.okno.blit(text_snezeno, (310, 12))
 
         # Aktuální velikost kočky
-        text_velikost = self.font_maly.render(
+        text_velikost = self.font_stredni.render(
             "Velikost: " + str(self.kocka.velikost), True, SVETLE_MODRA
         )
         self.okno.blit(text_velikost, (490, 12))
@@ -454,7 +443,9 @@ class Hra:
         # Nápověda – co může kočka sníst
         dalsi = self._co_muze_snizt()
         if dalsi:
-            text_cil = self.font_maly.render("Může sníst: " + dalsi, True, ZELENA)
+            text_cil = self.font_maly.render(
+                "Může sníst: " + dalsi, True, ZLUTA
+            )
         else:
             text_cil = self.font_maly.render(
                 "Sněz " + self.level_data["finalni_objekt"] + "!", True, ZLUTA
@@ -481,42 +472,6 @@ class Hra:
         na_mape = {obj.nazev for obj in self.objekty}
         return ", ".join(n for n in mozne if n in na_mape) or None
 
-    def _vykresli_prechod_levelu(self):
-        """Zobrazí obrazovku přechodu mezi levely."""
-        overlay = pygame.Surface((SIRKA, VYSKA), pygame.SRCALPHA)
-        overlay.fill((0, 20, 0, 210))
-        self.okno.blit(overlay, (0, 0))
-
-        dalsi = LEVELY[self.aktualni_level + 1]
-
-        text_hotovo = self.font_velky.render(
-            f"LEVEL {self.aktualni_level + 1} DOKONČEN!", True, ZLUTA
-        )
-        x = SIRKA // 2 - text_hotovo.get_width() // 2
-        self.okno.blit(text_hotovo, (x, VYSKA // 2 - 130))
-
-        text_snezenym = self.font_stredni.render(
-            "Snědena: " + self.data_levelu["sef"] + "!", True, ZELENA
-        )
-        x = SIRKA // 2 - text_snezenym.get_width() // 2
-        self.okno.blit(text_snezenym, (x, VYSKA // 2 - 70))
-
-        text_dalsi = self.font_stredni.render(
-            "Další prostředí: " + dalsi["nazev"], True, SVETLE_MODRA
-        )
-        x = SIRKA // 2 - text_dalsi.get_width() // 2
-        self.okno.blit(text_dalsi, (x, VYSKA // 2 - 15))
-
-        text_popis = self.font_stredni.render(dalsi["popis"], True, BILA)
-        x = SIRKA // 2 - text_popis.get_width() // 2
-        self.okno.blit(text_popis, (x, VYSKA // 2 + 40))
-
-        text_pokracuj = self.font_stredni.render(
-            "Stiskněte ENTER nebo MEZERNÍK pro pokračování", True, ZELENA
-        )
-        x = SIRKA // 2 - text_pokracuj.get_width() // 2
-        self.okno.blit(text_pokracuj, (x, VYSKA // 2 + 100))
-
     def _vykresli_vyhranu_obrazovku(self):
         """Zobrazí obrazovku výhry."""
         overlay = pygame.Surface((SIRKA, VYSKA), pygame.SRCALPHA)
@@ -525,16 +480,16 @@ class Hra:
 
         text_vitez = self.font_velky.render("VYHRÁLI JSTE!", True, ZLUTA)
         x = SIRKA // 2 - text_vitez.get_width() // 2
-        self.okno.blit(text_vitez, (x, VYSKA // 2 - 110))
+        self.okno.blit(text_vitez, (x, VYSKA // 2 - 100))
 
         text_popis = self.font_stredni.render(
-            f"Gratulujeme! Prošli jste všemi {len(LEVELY)} úrovněmi!", True, SVETLE_MODRA
+            "Kočka snědla celý vesmír!", True, SVETLE_MODRA
         )
         x = SIRKA // 2 - text_popis.get_width() // 2
-        self.okno.blit(text_popis, (x, VYSKA // 2 - 55))
+        self.okno.blit(text_popis, (x, VYSKA // 2 - 50))
 
         text_stat = self.font_stredni.render(
-            f"Snězeno objektů: {self.kocka.snedeno}   |   Finální velikost: {self.kocka.velikost}",
+            "Snězeno objektů: " + str(self.kocka.snedeno) + "   |   Finální velikost: " + str(self.kocka.velikost),
             True, BILA
         )
         x = SIRKA // 2 - text_stat.get_width() // 2
@@ -608,9 +563,11 @@ class Hra:
         snimek = 0
 
         while bezi:
+            # Zpracování vstupů
             bezi = self._zpracuj_vstup()
 
             if self.stav == "hra":
+                # Aktualizace herní logiky
                 self._zkontroluj_kolize()
 
                 # Pravidelné doplňování objektů (každých 180 snímků = 3 sekundy)
@@ -624,11 +581,17 @@ class Hra:
             # Kreslení
             self.okno.blit(self.pozadi, (0, 0))
 
+            # Vykreslení objektů
             for obj in self.objekty:
                 obj.vykresli(self.okno)
 
+            # Indikátory jedlosti
             self._vykresli_ukazatel_jedlosti()
+
+            # Vykreslení kočky
             self.kocka.vykresli(self.okno)
+
+            # UI
             self._vykresli_ui()
 
             # Obrazovky přechodu/výhry
@@ -637,6 +600,7 @@ class Hra:
             elif self.stav == "prechod_levelu":
                 self._vykresli_prechod_levelu_obrazovku()
 
+            # Zobrazení výsledku na obrazovce
             pygame.display.flip()
             self.hodiny.tick(FPS)
             snimek += 1
@@ -653,7 +617,7 @@ def main():
         print("Spusťte nejprve: python generate_assets.py")
         sys.exit(1)
 
-    hra = Hra(level=0)
+    hra = Hra()
     hra.spust()
 
 
