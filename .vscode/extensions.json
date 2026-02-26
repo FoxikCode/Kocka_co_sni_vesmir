@@ -1,0 +1,9 @@
+{
+    // Doporučené rozšíření pro tento projekt
+    "recommendations": [
+        // Python podpora (intellisense, linting, debugging)
+        "ms-python.python",
+        // Pylance – rychlá analýza Python kódu
+        "ms-python.vscode-pylance"
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    // Nastavení Python interpretru – VS Code automaticky hledá virtuální prostředí
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+
+    // Linting
+    "python.analysis.typeCheckingMode": "basic",
+
+    // Formátování
+    "editor.formatOnSave": false,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+
+    // Kódování souborů (důležité pro češtinu)
+    "files.encoding": "utf8",
+
+    // Skrytí generovaných souborů v průzkumníku
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    }
+}

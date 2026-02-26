@@ -6,6 +6,24 @@ Jednoduchá 2D hra v Pythonu a Pygame, kde ovládáte kosmickou kočku. Kočka s
 
 Kočka začíná malá a může nejprve jíst pouze hvězdy. S každým snědeným objektem roste a může pojídat stále větší objekty – asteroidy, měsíce, planety, slunce a nakonec celé galaxie. Hra končí výhrou po snězení galaxie.
 
+## Otevření ve Visual Studio Code
+
+1. **Stáhněte projekt** – klikněte na zelené tlačítko **Code → Download ZIP** na GitHubu a rozbalte archiv, nebo použijte Git:
+   ```bash
+   git clone https://github.com/FoxikCode/Kocka_co_sni_vesmir.git
+   ```
+2. **Otevřete složku ve VS Code** – spusťte VS Code, zvolte **Soubor → Otevřít složku…** (`Ctrl+K Ctrl+O`) a vyberte staženou složku `Kocka_co_sni_vesmir`.
+3. **Nainstalujte doporučená rozšíření** – VS Code nabídne instalaci rozšíření Python a Pylance. Klikněte **Nainstalovat vše**.
+4. **Vyberte Python interpreter** – stiskněte `Ctrl+Shift+P`, napište `Python: Select Interpreter` a vyberte dostupný Python 3.
+5. **Nainstalujte závislosti** – otevřete terminál ve VS Code (`Ctrl+ˇ`) a spusťte:
+   ```bash
+   pip install -r requirements.txt
+   ```
+6. **Vygenerujte textury** – v panelu **Spustit a ladit** (`Ctrl+Shift+D`) vyberte konfiguraci **Generovat textury** a stiskněte ▶ (nebo použijte terminál: `python generate_assets.py`).
+7. **Spusťte hru** – vyberte konfiguraci **Spustit hru** a stiskněte ▶ (nebo `python main.py` v terminálu).
+
+> 💡 **Tip:** Hru i generátor textur můžete také spustit přímo klávesou `F5` po otevření příslušného souboru (`main.py` nebo `generate_assets.py`).
+
 ## Instalace závislostí
 
 ```bash
