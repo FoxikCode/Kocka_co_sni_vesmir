@@ -112,7 +112,7 @@ LEVELY = [
         "nazev": "Vesmír",
         "popis": "Kočka snědla Zemi a teď jí vesmír!",
         "pozadi": "background",
-        "kocka_start": 64,
+        "kocka_start": 80,
         "objekty": [
             {"nazev": "Hvězda",   "soubor": "star.png",     "zakladni_velikost": 24,  "min_velikost_kocky": 40},
             {"nazev": "Asteroid", "soubor": "asteroid.png",  "zakladni_velikost": 38,  "min_velikost_kocky": 50},
@@ -466,7 +466,7 @@ class Hra:
 
         # Číslo a název levelu
         text_level = self.font_stredni.render(
-            "Level " + str(self.aktualni_level + 1) + ": " + self.data_levelu["nazev"],
+            f"Level {self.aktualni_level + 1}: {self.data_levelu['nazev']}",
             True, ZLUTA
         )
         self.okno.blit(text_level, (15, 12))
@@ -522,7 +522,7 @@ class Hra:
         dalsi = LEVELY[self.aktualni_level + 1]
 
         text_hotovo = self.font_velky.render(
-            "LEVEL " + str(self.aktualni_level + 1) + " DOKONČEN!", True, ZLUTA
+            f"LEVEL {self.aktualni_level + 1} DOKONČEN!", True, ZLUTA
         )
         x = SIRKA // 2 - text_hotovo.get_width() // 2
         self.okno.blit(text_hotovo, (x, VYSKA // 2 - 130))
@@ -560,14 +560,13 @@ class Hra:
         self.okno.blit(text_vitez, (x, VYSKA // 2 - 110))
 
         text_popis = self.font_stredni.render(
-            "Gratulujeme! Prošli jste všemi " + str(len(LEVELY)) + " úrovněmi!", True, SVETLE_MODRA
+            f"Gratulujeme! Prošli jste všemi {len(LEVELY)} úrovněmi!", True, SVETLE_MODRA
         )
         x = SIRKA // 2 - text_popis.get_width() // 2
         self.okno.blit(text_popis, (x, VYSKA // 2 - 55))
 
         text_stat = self.font_stredni.render(
-            "Snězeno objektů: " + str(self.kocka.snedeno)
-            + "   |   Finální velikost: " + str(self.kocka.velikost),
+            f"Snězeno objektů: {self.kocka.snedeno}   |   Finální velikost: {self.kocka.velikost}",
             True, BILA
         )
         x = SIRKA // 2 - text_stat.get_width() // 2
