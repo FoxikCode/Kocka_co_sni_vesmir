@@ -5,9 +5,18 @@ Spusťte tento skript před spuštěním hry: python generate_assets.py
 """
 
 import os
+import sys
 import math
 import random
-from PIL import Image, ImageDraw, ImageFilter
+
+try:
+    from PIL import Image, ImageDraw, ImageFilter
+except ImportError:
+    print("CHYBA: Knihovna Pillow není nainstalována!")
+    print("Nainstalujte ji příkazem:  pip install Pillow")
+    print()
+    input("Stiskněte Enter pro zavření...")
+    sys.exit(1)
 
 # Vytvoření složky assets, pokud neexistuje
 os.makedirs("assets", exist_ok=True)
@@ -1008,3 +1017,5 @@ if __name__ == "__main__":
     print("=" * 50)
     print("Všechny textury byly úspěšně vygenerovány do složky assets/")
     print("Nyní můžete spustit hru: python main.py")
+    print()
+    input("Stiskněte Enter pro zavření...")
