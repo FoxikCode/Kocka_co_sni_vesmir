@@ -1,10 +1,44 @@
 # Kočka co sní vesmír 🐱🌌
 
-Jednoduchá 2D hra v Pythonu a Pygame, kde ovládáte kosmickou kočku. Kočka se pohybuje po vesmírné mapě, jí vesmírné objekty a s každým snědeným objektem se zvětšuje. Cíl hry je sníst celý vesmír!
+Hra v Pythonu a Pygame inspirovaná Tasty Planet. Ovládáte kočku, která prochází **třemi levely** – od mikroskopického světa laboratoře až po celý vesmír. S každým snědeným objektem kočka roste a může pojídat stále větší věci!
 
-## Popis hry
+## Levely
 
-Kočka začíná malá a může nejprve jíst pouze hvězdy. S každým snědeným objektem roste a může pojídat stále větší objekty – asteroidy, měsíce, planety, slunce a nakonec celé galaxie. Hra končí výhrou po snězení galaxie.
+### 🔬 Level 1: Laboratoř
+Kočka začíná jako miniaturní tvor v laboratoři. Sněz vše od bakterií po krysu a unikni!
+
+| Objekt | Pořadí |
+|--------|--------|
+| 🦠 Bakterie | od začátku |
+| 🔵 Buňka | po několika bakteriích |
+| 🐜 Mravenec | po buňkách |
+| 🪰 Moucha | střední objekty |
+| 🐭 Myš | velké objekty |
+| 🐀 **Krysa** | **boss – snězením postoupíš do města** |
+
+### 🏙️ Level 2: Město
+Kočka dobývá město. Sněz vše od psů po mrakodrap!
+
+| Objekt | Pořadí |
+|--------|--------|
+| 🐕 Pes | od začátku |
+| 🧍 Člověk | brzy |
+| 🚗 Auto | střední objekty |
+| 🚌 Autobus | větší objekty |
+| 🏠 Dům | velké objekty |
+| 🏢 **Mrakodrap** | **boss – snězením postoupíš do vesmíru** |
+
+### 🌌 Level 3: Vesmír
+Kočka dobývá vesmír. Sněz hvězdy, planety a nakonec celou galaxii!
+
+| Objekt | Pořadí |
+|--------|--------|
+| ⭐ Hvězda | od začátku |
+| ☄️ Asteroid | brzy |
+| 🌙 Měsíc | střední objekty |
+| 🪐 Planeta | velké objekty |
+| ☀️ Slunce | velmi velké objekty |
+| 🌌 **Galaxie** | **finální boss – výhra!** |
 
 ## Otevření ve Visual Studio Code
 
@@ -54,6 +88,7 @@ python main.py
 | `S` nebo `↓` | Pohyb dolů |
 | `A` nebo `←` | Pohyb doleva |
 | `D` nebo `→` | Pohyb doprava |
+| `libovolná klávesa` | Pokračovat na další level |
 | `R` | Nová hra (po výhře) |
 | `ESC` | Ukončení hry |
 
@@ -64,16 +99,8 @@ python main.py
 - **Červená tečka** pod objektem = kočka ještě není dost velká.
 - Po snězení objektu se kočka zvětší.
 - Nové objekty se průběžně objevují na náhodných místech.
-- Hra končí výhrou, když kočka sní galaxii.
-
-## Pořadí objektů od nejmenšího po největší
-
-1. ⭐ **Hvězda** – lze jíst od začátku
-2. ☄️ **Asteroid** – po několika hvězdách
-3. 🌙 **Měsíc** – střední objekty
-4. 🪐 **Planeta** – velké objekty
-5. ☀️ **Slunce** – velmi velké objekty
-6. 🌌 **Galaxie** – finální objekt, snězením vyhrajete!
+- Sněz **boss objekt** levelu (Krysa / Mrakodrap / Galaxie) a postoupíš do dalšího levelu.
+- Po každém levelu se kočka přesune do nového prostředí a začne v odpovídající velikosti.
 
 ## Technické požadavky
 
