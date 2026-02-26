@@ -1,8 +1,13 @@
 """
 Kočka co sní vesmír - Hlavní herní soubor
 ==========================================
-Kočka se pohybuje po vesmírné mapě, jí vesmírné objekty a s každým
-snědeným objektem se zvětšuje. Cíl hry je sníst celý vesmír!
+Kočka prochází pěti prostředími podobně jako ve hře Tasty Planet:
+  Level 1 – Laboratoř  (bakterie, molekuly, buňky …)
+  Level 2 – Kuchyně    (drobečky, mravenci, myška …)
+  Level 3 – Zahrada    (květ, slepice, králík, pes, člověk …)
+  Level 4 – Město      (auta, domy, paneláky, hora …)
+  Level 5 – Vesmír     (hvězdy, planety, galaxie …)
+Sněz boss-objekt každého levelu a postup dál!
 
 Ovládání: Šipky nebo WASD
 """
@@ -36,28 +41,90 @@ TMAVE_MODRA = (20, 30, 80)
 # Rychlost kočky (px/snímek)
 RYCHLOST_KOCKY = 3
 
-# Definice vesmírných objektů: název, soubor textury, základní velikost, min. velikost kočky pro snězení
-OBJEKTY = [
-    {"nazev": "Hvězda",   "soubor": "star.png",     "zakladni_velikost": 24,  "min_velikost_kocky": 40},
-    {"nazev": "Asteroid", "soubor": "asteroid.png",  "zakladni_velikost": 38,  "min_velikost_kocky": 50},
-    {"nazev": "Měsíc",    "soubor": "moon.png",      "zakladni_velikost": 52,  "min_velikost_kocky": 70},
-    {"nazev": "Planeta",  "soubor": "planet.png",    "zakladni_velikost": 68,  "min_velikost_kocky": 100},
-    {"nazev": "Slunce",   "soubor": "sun.png",       "zakladni_velikost": 90,  "min_velikost_kocky": 150},
-    {"nazev": "Galaxie",  "soubor": "galaxy.png",    "zakladni_velikost": 120, "min_velikost_kocky": 220},
-]
-
 # Počty objektů na mapě
 MAX_OBJEKTU_KAZDEHO_DRUHU = 3
 
-# Růst kočky při snězení objektu (přičteno k velikosti)
-RUST_PO_SNEZENI = {
-    "Hvězda":   4,
-    "Asteroid": 7,
-    "Měsíc":    12,
-    "Planeta":  20,
-    "Slunce":   35,
-    "Galaxie":  60,
-}
+# ─── Definice levelů ─────────────────────────────────────────────────────────
+# Každý level má své prostředí, objekty a boss-objekt.
+# Snězením boss-objektu kočka postoupí do dalšího levelu.
+LEVELY = [
+    {
+        "nazev": "Laboratoř",
+        "popis": "Jsi malá kočka v laboratoři. Sněz vše co najdeš!",
+        "pozadi": "background_lab",
+        "kocka_start": 20,
+        "objekty": [
+            {"nazev": "Bakterie",      "soubor": "bacteria.png",  "zakladni_velikost": 8,  "min_velikost_kocky": 15},
+            {"nazev": "Molekula",      "soubor": "molecule.png",  "zakladni_velikost": 12, "min_velikost_kocky": 20},
+            {"nazev": "Buňka",         "soubor": "cell.png",      "zakladni_velikost": 18, "min_velikost_kocky": 27},
+            {"nazev": "Kapička",       "soubor": "droplet.png",   "zakladni_velikost": 26, "min_velikost_kocky": 38},
+            {"nazev": "Petriho miska", "soubor": "petri.png",     "zakladni_velikost": 38, "min_velikost_kocky": 55},
+        ],
+        "sef": "Petriho miska",
+        "rust": {"Bakterie": 3, "Molekula": 5, "Buňka": 8, "Kapička": 14, "Petriho miska": 22},
+    },
+    {
+        "nazev": "Kuchyně",
+        "popis": "Kočka unikla z laboratoře do kuchyně!",
+        "pozadi": "background_kitchen",
+        "kocka_start": 40,
+        "objekty": [
+            {"nazev": "Drobeček",  "soubor": "crumb.png",      "zakladni_velikost": 14, "min_velikost_kocky": 35},
+            {"nazev": "Cukr",      "soubor": "sugar.png",       "zakladni_velikost": 20, "min_velikost_kocky": 42},
+            {"nazev": "Mravenec",  "soubor": "ant.png",         "zakladni_velikost": 28, "min_velikost_kocky": 55},
+            {"nazev": "Šváb",      "soubor": "cockroach.png",   "zakladni_velikost": 38, "min_velikost_kocky": 73},
+            {"nazev": "Myška",     "soubor": "mouse.png",       "zakladni_velikost": 52, "min_velikost_kocky": 98},
+        ],
+        "sef": "Myška",
+        "rust": {"Drobeček": 4, "Cukr": 7, "Mravenec": 12, "Šváb": 20, "Myška": 35},
+    },
+    {
+        "nazev": "Zahrada",
+        "popis": "Kočka vyšla ven na zahradu!",
+        "pozadi": "background_garden",
+        "kocka_start": 55,
+        "objekty": [
+            {"nazev": "Květ",    "soubor": "flower.png",   "zakladni_velikost": 18, "min_velikost_kocky": 50},
+            {"nazev": "Slepice", "soubor": "chicken.png",  "zakladni_velikost": 28, "min_velikost_kocky": 65},
+            {"nazev": "Králík",  "soubor": "rabbit.png",   "zakladni_velikost": 40, "min_velikost_kocky": 90},
+            {"nazev": "Pes",     "soubor": "dog.png",      "zakladni_velikost": 55, "min_velikost_kocky": 120},
+            {"nazev": "Člověk",  "soubor": "person.png",   "zakladni_velikost": 72, "min_velikost_kocky": 162},
+        ],
+        "sef": "Člověk",
+        "rust": {"Květ": 5, "Slepice": 12, "Králík": 22, "Pes": 38, "Člověk": 60},
+    },
+    {
+        "nazev": "Město",
+        "popis": "Obrovská kočka terorizuje město!",
+        "pozadi": "background_city",
+        "kocka_start": 70,
+        "objekty": [
+            {"nazev": "Auto",    "soubor": "car.png",       "zakladni_velikost": 40, "min_velikost_kocky": 65},
+            {"nazev": "Dům",     "soubor": "house.png",     "zakladni_velikost": 55, "min_velikost_kocky": 90},
+            {"nazev": "Autobus", "soubor": "bus.png",       "zakladni_velikost": 70, "min_velikost_kocky": 125},
+            {"nazev": "Panelák", "soubor": "building.png",  "zakladni_velikost": 88, "min_velikost_kocky": 175},
+            {"nazev": "Hora",    "soubor": "mountain.png",  "zakladni_velikost": 110, "min_velikost_kocky": 240},
+        ],
+        "sef": "Hora",
+        "rust": {"Auto": 15, "Dům": 28, "Autobus": 48, "Panelák": 75, "Hora": 120},
+    },
+    {
+        "nazev": "Vesmír",
+        "popis": "Kočka snědla Zemi a teď jí vesmír!",
+        "pozadi": "background",
+        "kocka_start": 64,
+        "objekty": [
+            {"nazev": "Hvězda",   "soubor": "star.png",     "zakladni_velikost": 24,  "min_velikost_kocky": 40},
+            {"nazev": "Asteroid", "soubor": "asteroid.png",  "zakladni_velikost": 38,  "min_velikost_kocky": 50},
+            {"nazev": "Měsíc",    "soubor": "moon.png",      "zakladni_velikost": 52,  "min_velikost_kocky": 70},
+            {"nazev": "Planeta",  "soubor": "planet.png",    "zakladni_velikost": 68,  "min_velikost_kocky": 100},
+            {"nazev": "Slunce",   "soubor": "sun.png",       "zakladni_velikost": 90,  "min_velikost_kocky": 150},
+            {"nazev": "Galaxie",  "soubor": "galaxy.png",    "zakladni_velikost": 120, "min_velikost_kocky": 220},
+        ],
+        "sef": "Galaxie",
+        "rust": {"Hvězda": 4, "Asteroid": 7, "Měsíc": 12, "Planeta": 20, "Slunce": 35, "Galaxie": 60},
+    },
+]
 
 
 class VesmirskyObjekt:
@@ -119,10 +186,10 @@ class VesmirskyObjekt:
 class Kocka:
     """Třída reprezentující hráčovu kočku."""
 
-    def __init__(self, textura):
+    def __init__(self, textura, zacatecni_velikost=64):
         """Inicializace kočky uprostřed obrazovky."""
         self.textura_orig = textura
-        self.velikost = 64          # Počáteční velikost kočky v pixelech
+        self.velikost = zacatecni_velikost  # Počáteční velikost kočky v pixelech
         self.x = SIRKA // 2
         self.y = VYSKA // 2
         self.rychlost = RYCHLOST_KOCKY
@@ -176,9 +243,8 @@ class Kocka:
         if pohyb_x != 0 or pohyb_y != 0:
             self.animacni_cas += 0.2
 
-    def snezt(self, objekt):
-        """Zpracuje snězení objektu – zvětší kočku."""
-        rust = RUST_PO_SNEZENI.get(objekt.nazev, 5)
+    def snezt(self, rust=5):
+        """Zpracuje snězení objektu – zvětší kočku o zadaný počet pixelů."""
         self.velikost += rust
         self.snedeno += 1
         self._aktualizuj_texturu()
@@ -200,20 +266,24 @@ class Kocka:
 class Hra:
     """Hlavní herní třída, která řídí celý průběh hry."""
 
-    def __init__(self):
+    def __init__(self, level=0):
         """Inicializace hry – vytvoří okno, načte textury, připraví herní objekty."""
         self.okno = pygame.display.set_mode((SIRKA, VYSKA))
         pygame.display.set_caption(NAZEV_HRY)
         self.hodiny = pygame.time.Clock()
 
+        # Aktuální level
+        self.aktualni_level = level
+        self.data_levelu = LEVELY[level]
+
         # Načtení textur
         self.textury = self._nacti_textury()
 
-        # Herní stav
-        self.kocka = Kocka(self.textury["cat"])
-        self.objekty = []          # Seznam aktivních objektů na mapě
-        self.stav = "hra"          # "hra", "vyhra", "pauza"
-        self.zprava_snezeni = None  # Zpráva při snězení objektu (název + čas zobrazení)
+        # Herní stav: "hra", "prechod_levelu", "vyhra"
+        self.kocka = Kocka(self.textury["cat"], self.data_levelu["kocka_start"])
+        self.objekty = []
+        self.stav = "hra"
+        self.zprava_snezeni = None
         self.cas_zpravy = 0
 
         # Fonty pro zobrazení textu
@@ -224,15 +294,48 @@ class Hra:
         # Naplnění mapy objekty při startu
         self._naplni_objekty()
 
-        # Pozadí (přetiluje celé okno)
-        self.pozadi = pygame.transform.scale(self.textury["background"], (SIRKA, VYSKA))
+        # Pozadí specifické pro aktuální level
+        self.pozadi = pygame.transform.scale(
+            self.textury[self.data_levelu["pozadi"]], (SIRKA, VYSKA)
+        )
 
     def _nacti_textury(self):
-        """Načte všechny textury ze složky assets/."""
+        """Načte všechny textury ze složky assets/ (pro všechny levely najednou)."""
         textury = {}
         soubory = {
-            "cat":        "cat.png",
-            "background": "background.png",
+            # Společné
+            "cat":                "cat.png",
+            # Pozadí
+            "background":         "background.png",
+            "background_lab":     "background_lab.png",
+            "background_kitchen": "background_kitchen.png",
+            "background_garden":  "background_garden.png",
+            "background_city":    "background_city.png",
+            # Level 1 – Laboratoř
+            "bacteria":   "bacteria.png",
+            "molecule":   "molecule.png",
+            "cell":       "cell.png",
+            "droplet":    "droplet.png",
+            "petri":      "petri.png",
+            # Level 2 – Kuchyně
+            "crumb":      "crumb.png",
+            "sugar":      "sugar.png",
+            "ant":        "ant.png",
+            "cockroach":  "cockroach.png",
+            "mouse":      "mouse.png",
+            # Level 3 – Zahrada
+            "flower":     "flower.png",
+            "chicken":    "chicken.png",
+            "rabbit":     "rabbit.png",
+            "dog":        "dog.png",
+            "person":     "person.png",
+            # Level 4 – Město
+            "car":        "car.png",
+            "house":      "house.png",
+            "bus":        "bus.png",
+            "building":   "building.png",
+            "mountain":   "mountain.png",
+            # Level 5 – Vesmír
             "star":       "star.png",
             "asteroid":   "asteroid.png",
             "moon":       "moon.png",
@@ -253,17 +356,17 @@ class Hra:
         return textury
 
     def _naplni_objekty(self):
-        """Naplní mapu počátečními objekty."""
-        for typ in OBJEKTY:
+        """Naplní mapu počátečními objekty aktuálního levelu."""
+        for typ in self.data_levelu["objekty"]:
             for _ in range(MAX_OBJEKTU_KAZDEHO_DRUHU):
                 self._pridej_objekt(typ)
 
     def _pridej_objekt(self, typ=None):
-        """Přidá nový vesmírný objekt na náhodné místo na mapě."""
+        """Přidá nový objekt na náhodné místo na mapě."""
         if typ is None:
-            # Vyber náhodný typ objektu (s váhami – menší objekty se objevují častěji)
-            vahy = [5, 4, 3, 2, 1, 0.5]
-            typ = random.choices(OBJEKTY, weights=vahy)[0]
+            objekty_levelu = self.data_levelu["objekty"]
+            vahy = [5, 4, 3, 2, 1, 0.5][:len(objekty_levelu)]
+            typ = random.choices(objekty_levelu, weights=vahy)[0]
 
         klic_textury = typ["soubor"].replace(".png", "")
         textura = self.textury[klic_textury]
@@ -291,9 +394,15 @@ class Hra:
             if udalost.type == pygame.KEYDOWN:
                 if udalost.key == pygame.K_ESCAPE:
                     return False
-                # Restart hry po výhře
+                # Přechod na další level
+                if self.stav == "prechod_levelu" and udalost.key in (
+                    pygame.K_r, pygame.K_RETURN, pygame.K_SPACE
+                ):
+                    self.__init__(self.aktualni_level + 1)
+                    return True
+                # Restart hry od začátku po výhře
                 if self.stav == "vyhra" and udalost.key == pygame.K_r:
-                    self.__init__()
+                    self.__init__(0)
                     return True
 
         # Pohyb kočky
@@ -304,10 +413,9 @@ class Hra:
         return True
 
     def _zkontroluj_kolize(self):
-        """Zkontroluje kolize kočky s vesmírnými objekty."""
+        """Zkontroluje kolize kočky s objekty."""
         snedeno = []
         for obj in self.objekty:
-            # Detekce kruhové kolize (přesnější než rect)
             dx = self.kocka.x - obj.x
             dy = self.kocka.y - obj.y
             vzdalenost = (dx * dx + dy * dy) ** 0.5
@@ -315,70 +423,75 @@ class Hra:
 
             if vzdalenost < prah_kolize:
                 if self.kocka.muze_snizt(obj):
-                    # Kočka snědla objekt!
                     snedeno.append(obj)
-                    self.kocka.snezt(obj)
+                    rust = self.data_levelu["rust"].get(obj.nazev, 5)
+                    self.kocka.snezt(rust)
                     self.zprava_snezeni = "Snědena: " + obj.nazev + "!"
                     self.cas_zpravy = 120  # 2 sekundy při 60 FPS
 
-                    # Výhra – snezení galaxie
-                    if obj.nazev == "Galaxie":
-                        self.stav = "vyhra"
+                    # Boss snědena → konec levelu
+                    if obj.nazev == self.data_levelu["sef"]:
+                        if self.aktualni_level + 1 < len(LEVELY):
+                            self.stav = "prechod_levelu"
+                        else:
+                            self.stav = "vyhra"
 
-        # Odstranění snědených objektů
+        # Odstranění snědených objektů a respawn
         for obj in snedeno:
             self.objekty.remove(obj)
-            # Respawn nového objektu (kromě galaxie)
-            if obj.nazev != "Galaxie":
-                # Přidáme nový objekt s malou prodlevou (náhodný typ)
-                vahy = [5, 4, 3, 2, 1, 0.5]
-                novy_typ = random.choices(OBJEKTY, weights=vahy)[0]
+            if obj.nazev != self.data_levelu["sef"]:
+                vahy = [5, 4, 3, 2, 1, 0.5][:len(self.data_levelu["objekty"])]
+                novy_typ = random.choices(self.data_levelu["objekty"], weights=vahy)[0]
                 self._pridej_objekt(novy_typ)
 
     def _doplneni_objektu(self):
         """Průběžně doplňuje objekty na mapě, aby jich bylo vždy dost."""
-        pocty = {typ["nazev"]: 0 for typ in OBJEKTY}
+        pocty = {typ["nazev"]: 0 for typ in self.data_levelu["objekty"]}
         for obj in self.objekty:
             pocty[obj.nazev] = pocty.get(obj.nazev, 0) + 1
 
-        for typ in OBJEKTY:
+        for typ in self.data_levelu["objekty"]:
             while pocty[typ["nazev"]] < MAX_OBJEKTU_KAZDEHO_DRUHU:
-                # Galaxii přidáme jen pokud ještě nebyla snězena
-                if typ["nazev"] == "Galaxie" and self.stav == "vyhra":
+                if typ["nazev"] == self.data_levelu["sef"] and self.stav in ("prechod_levelu", "vyhra"):
                     break
                 self._pridej_objekt(typ)
                 pocty[typ["nazev"]] += 1
 
     def _vykresli_ui(self):
-        """Vykreslí herní uživatelské rozhraní (skóre, velikost kočky, atd.)."""
+        """Vykreslí herní uživatelské rozhraní."""
         # Panel nahoře – poloprůhledné pozadí
         panel = pygame.Surface((SIRKA, 50), pygame.SRCALPHA)
         panel.fill((0, 0, 30, 160))
         self.okno.blit(panel, (0, 0))
 
+        # Číslo a název levelu
+        text_level = self.font_stredni.render(
+            "Level " + str(self.aktualni_level + 1) + ": " + self.data_levelu["nazev"],
+            True, ZLUTA
+        )
+        self.okno.blit(text_level, (15, 12))
+
         # Počet snědených objektů
-        text_snezeno = self.font_stredni.render(
+        text_snezeno = self.font_maly.render(
             "Snězeno: " + str(self.kocka.snedeno), True, BILA
         )
-        self.okno.blit(text_snezeno, (15, 12))
+        self.okno.blit(text_snezeno, (310, 16))
 
         # Aktuální velikost kočky
-        text_velikost = self.font_stredni.render(
+        text_velikost = self.font_maly.render(
             "Velikost: " + str(self.kocka.velikost), True, SVETLE_MODRA
         )
-        self.okno.blit(text_velikost, (220, 12))
+        self.okno.blit(text_velikost, (460, 16))
 
         # Nápověda – co může kočka sníst
         dalsi = self._co_muze_snizt()
         if dalsi:
-            text_cil = self.font_maly.render(
-                "Může sníst: " + dalsi, True, ZLUTA
-            )
+            text_cil = self.font_maly.render("Může sníst: " + dalsi, True, ZELENA)
         else:
             text_cil = self.font_maly.render(
-                "Vše snězeno! Hledej galaxii!", True, ZLUTA
+                "Hledej: " + self.data_levelu["sef"] + "!", True, ZLUTA
             )
-        self.okno.blit(text_cil, (450, 16))
+        self.okno.blit(text_cil, (610, 16))
 
         # Zpráva o snězení (dočasná)
         if self.cas_zpravy > 0:
@@ -394,42 +507,75 @@ class Hra:
     def _co_muze_snizt(self):
         """Vrátí seznam názvů objektů, které kočka může nyní sníst."""
         mozne = []
-        for typ in OBJEKTY:
+        for typ in self.data_levelu["objekty"]:
             if self.kocka.velikost >= typ["min_velikost_kocky"]:
                 mozne.append(typ["nazev"])
-        # Vrátíme jen ty, které jsou ještě na mapě a kočka je může sníst
         na_mape = {obj.nazev for obj in self.objekty}
         return ", ".join(n for n in mozne if n in na_mape) or None
 
+    def _vykresli_prechod_levelu(self):
+        """Zobrazí obrazovku přechodu mezi levely."""
+        overlay = pygame.Surface((SIRKA, VYSKA), pygame.SRCALPHA)
+        overlay.fill((0, 20, 0, 210))
+        self.okno.blit(overlay, (0, 0))
+
+        dalsi = LEVELY[self.aktualni_level + 1]
+
+        text_hotovo = self.font_velky.render(
+            "LEVEL " + str(self.aktualni_level + 1) + " DOKONČEN!", True, ZLUTA
+        )
+        x = SIRKA // 2 - text_hotovo.get_width() // 2
+        self.okno.blit(text_hotovo, (x, VYSKA // 2 - 130))
+
+        text_snezenym = self.font_stredni.render(
+            "Snědena: " + self.data_levelu["sef"] + "!", True, ZELENA
+        )
+        x = SIRKA // 2 - text_snezenym.get_width() // 2
+        self.okno.blit(text_snezenym, (x, VYSKA // 2 - 70))
+
+        text_dalsi = self.font_stredni.render(
+            "Další prostředí: " + dalsi["nazev"], True, SVETLE_MODRA
+        )
+        x = SIRKA // 2 - text_dalsi.get_width() // 2
+        self.okno.blit(text_dalsi, (x, VYSKA // 2 - 15))
+
+        text_popis = self.font_stredni.render(dalsi["popis"], True, BILA)
+        x = SIRKA // 2 - text_popis.get_width() // 2
+        self.okno.blit(text_popis, (x, VYSKA // 2 + 40))
+
+        text_pokracuj = self.font_stredni.render(
+            "Stiskněte ENTER nebo MEZERNÍK pro pokračování", True, ZELENA
+        )
+        x = SIRKA // 2 - text_pokracuj.get_width() // 2
+        self.okno.blit(text_pokracuj, (x, VYSKA // 2 + 100))
+
     def _vykresli_vyhranu_obrazovku(self):
-        """Zobrazí obrazovku výhry."""
-        # Poloprůhledný tmavý překryv
+        """Zobrazí obrazovku konečné výhry (všechny levely dokončeny)."""
         overlay = pygame.Surface((SIRKA, VYSKA), pygame.SRCALPHA)
         overlay.fill((0, 0, 20, 180))
         self.okno.blit(overlay, (0, 0))
 
-        # Nadpis
-        text_vitez = self.font_velky.render("VYHRÁLI JSTE!", True, ZLUTA)
+        text_vitez = self.font_velky.render("KOČKA SNĚDLA CELÝ VESMÍR!", True, ZLUTA)
         x = SIRKA // 2 - text_vitez.get_width() // 2
-        self.okno.blit(text_vitez, (x, VYSKA // 2 - 100))
+        self.okno.blit(text_vitez, (x, VYSKA // 2 - 110))
 
-        # Podnadpis
         text_popis = self.font_stredni.render(
-            "Kočka snědla celý vesmír!", True, SVETLE_MODRA
+            "Gratulujeme! Prošli jste všemi " + str(len(LEVELY)) + " úrovněmi!", True, SVETLE_MODRA
         )
         x = SIRKA // 2 - text_popis.get_width() // 2
-        self.okno.blit(text_popis, (x, VYSKA // 2 - 50))
+        self.okno.blit(text_popis, (x, VYSKA // 2 - 55))
 
-        # Statistiky
         text_stat = self.font_stredni.render(
-            "Snězeno objektů: " + str(self.kocka.snedeno) + "   |   Finální velikost: " + str(self.kocka.velikost),
+            "Snězeno objektů: " + str(self.kocka.snedeno)
+            + "   |   Finální velikost: " + str(self.kocka.velikost),
             True, BILA
         )
         x = SIRKA // 2 - text_stat.get_width() // 2
         self.okno.blit(text_stat, (x, VYSKA // 2))
 
-        # Restart
-        text_restart = self.font_stredni.render("Stiskněte R pro novou hru", True, ZELENA)
+        text_restart = self.font_stredni.render(
+            "Stiskněte R pro novou hru od Level 1", True, ZELENA
+        )
         x = SIRKA // 2 - text_restart.get_width() // 2
         self.okno.blit(text_restart, (x, VYSKA // 2 + 60))
 
@@ -437,14 +583,7 @@ class Hra:
         """Vedle každého objektu zobrazí malý indikátor, zda ho kočka může sníst."""
         for obj in self.objekty:
             muze = self.kocka.muze_snizt(obj)
-            if muze:
-                # Zelený kroužek – dostupný objekt
-                barva = (100, 255, 100)
-            else:
-                # Červený kroužek – nedostupný (kočka je moc malá)
-                barva = (255, 80, 80)
-
-            # Malý indikátor pod objektem
+            barva = (100, 255, 100) if muze else (255, 80, 80)
             ind_x = obj.x
             ind_y = obj.y + obj.velikost // 2 + 6
             pygame.draw.circle(self.okno, barva, (ind_x, ind_y), 4)
@@ -455,11 +594,9 @@ class Hra:
         snimek = 0
 
         while bezi:
-            # Zpracování vstupů
             bezi = self._zpracuj_vstup()
 
             if self.stav == "hra":
-                # Aktualizace herní logiky
                 self._zkontroluj_kolize()
 
                 # Pravidelné doplňování objektů (každých 180 snímků = 3 sekundy)
@@ -473,24 +610,18 @@ class Hra:
             # Kreslení
             self.okno.blit(self.pozadi, (0, 0))
 
-            # Vykreslení objektů
             for obj in self.objekty:
                 obj.vykresli(self.okno)
 
-            # Indikátory jedlosti
             self._vykresli_ukazatel_jedlosti()
-
-            # Vykreslení kočky
             self.kocka.vykresli(self.okno)
-
-            # UI
             self._vykresli_ui()
 
-            # Obrazovka výhry
-            if self.stav == "vyhra":
+            if self.stav == "prechod_levelu":
+                self._vykresli_prechod_levelu()
+            elif self.stav == "vyhra":
                 self._vykresli_vyhranu_obrazovku()
 
-            # Zobrazení výsledku na obrazovce
             pygame.display.flip()
             self.hodiny.tick(FPS)
             snimek += 1
@@ -507,7 +638,7 @@ def main():
         print("Spusťte nejprve: python generate_assets.py")
         sys.exit(1)
 
-    hra = Hra()
+    hra = Hra(level=0)
     hra.spust()
 
 
