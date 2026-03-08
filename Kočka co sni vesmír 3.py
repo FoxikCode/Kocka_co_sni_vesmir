@@ -12,7 +12,7 @@ SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 700
 FPS = 60
 BASE_CAT_SIZE = 40
-MAX_CAT_SIZE = 250
+MAX_CAT_SIZE = 500
 
 # Barvy
 BLACK = (0, 0, 0)
@@ -945,6 +945,204 @@ class TextureGenerator:
                      fill=(255, 220, 50), outline=(200, 170, 30))
         return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
 
+    @staticmethod
+    def create_alien_building_texture(size=50):
+        """Vytvoří texturu mimozemského baráku"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([size*0.1, size*0.2, size*0.9, size*0.95],
+                       fill=(80, 60, 120), outline=(50, 35, 90), width=2)
+        for row in range(3):
+            for col in range(2):
+                wx = size*0.2 + col * size*0.35
+                wy = size*0.28 + row * size*0.2
+                draw.rectangle([wx, wy, wx + size*0.2, wy + size*0.12],
+                               fill=(150, 255, 200), outline=(100, 200, 150))
+        draw.arc([size*0.05, size*0.05, size*0.95, size*0.4],
+                 start=180, end=360, fill=(120, 80, 180), width=3)
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_alien_tower_texture(size=50):
+        """Vytvoří texturu mimozemské věže"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([size*0.25, size*0.1, size*0.75, size*0.95],
+                       fill=(100, 80, 150), outline=(70, 50, 120), width=2)
+        draw.line([(size*0.5, size*0.1), (size*0.5, size*0.0)],
+                  fill=(200, 200, 220), width=2)
+        draw.ellipse([size*0.43, 0, size*0.57, size*0.06], fill=(255, 100, 100))
+        for i in range(4):
+            wy = size*0.2 + i * size*0.18
+            draw.ellipse([size*0.35, wy, size*0.65, wy + size*0.1],
+                         fill=(100, 255, 180), outline=(60, 200, 140))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_alien_dome_texture(size=50):
+        """Vytvoří texturu mimozemské kupole"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([size*0.05, size*0.6, size*0.95, size*0.95],
+                       fill=(90, 70, 130), outline=(60, 45, 100), width=2)
+        draw.ellipse([size*0.05, size*0.1, size*0.95, size*0.7],
+                     fill=(120, 100, 180), outline=(80, 60, 140), width=2)
+        draw.ellipse([size*0.4, size*0.15, size*0.6, size*0.35],
+                     fill=(200, 255, 220))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_alien_factory_texture(size=50):
+        """Vytvoří texturu mimozemské továrny"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([size*0.05, size*0.3, size*0.95, size*0.95],
+                       fill=(70, 70, 90), outline=(45, 45, 65), width=2)
+        draw.rectangle([size*0.7, size*0.05, size*0.85, size*0.35],
+                       fill=(80, 80, 100), outline=(55, 55, 75), width=2)
+        draw.ellipse([size*0.65, size*0.0, size*0.9, size*0.15], fill=(150, 150, 160))
+        draw.rectangle([size*0.15, size*0.55, size*0.55, size*0.93],
+                       fill=(50, 50, 70), outline=(35, 35, 50))
+        draw.rectangle([size*0.65, size*0.4, size*0.85, size*0.5], fill=(255, 200, 100))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_mountain_chunk_texture(size=60):
+        """Vytvoří texturu kusu hory"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.polygon([(size*0.5, size*0.05), (size*0.0, size*0.95), (size, size*0.95)],
+                     fill=(100, 85, 70), outline=(70, 58, 45), width=2)
+        draw.polygon([(size*0.5, size*0.05), (size*0.35, size*0.3), (size*0.65, size*0.3)],
+                     fill=(220, 230, 240))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_giant_tree_texture(size=60):
+        """Vytvoří texturu obřího stromu"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([size*0.4, size*0.5, size*0.6, size*0.95],
+                       fill=(90, 60, 30), outline=(60, 40, 20), width=2)
+        draw.ellipse([size*0.1, size*0.05, size*0.9, size*0.6],
+                     fill=(40, 140, 50), outline=(25, 100, 35), width=2)
+        draw.ellipse([size*0.25, size*0.15, size*0.7, size*0.45], fill=(60, 180, 70))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_giant_crystal_texture(size=60):
+        """Vytvoří texturu obřího krystalu"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.polygon([(size*0.5, size*0.0), (size*0.2, size*0.5), (size*0.35, size*0.95),
+                      (size*0.65, size*0.95), (size*0.8, size*0.5)],
+                     fill=(100, 180, 255), outline=(60, 120, 200), width=2)
+        draw.polygon([(size*0.5, size*0.1), (size*0.35, size*0.45), (size*0.5, size*0.7)],
+                     fill=(160, 220, 255))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_lake_texture(size=60):
+        """Vytvoří texturu jezera"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([size*0.05, size*0.2, size*0.95, size*0.8],
+                     fill=(40, 100, 180), outline=(30, 70, 140), width=2)
+        draw.ellipse([size*0.2, size*0.35, size*0.6, size*0.55], fill=(80, 160, 220))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_meteorite_texture(size=40):
+        """Vytvoří texturu meteoritu"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([size*0.1, size*0.1, size*0.9, size*0.9],
+                     fill=(120, 100, 80), outline=(80, 65, 50), width=2)
+        draw.ellipse([size*0.25, size*0.3, size*0.45, size*0.5], fill=(90, 75, 60))
+        draw.ellipse([size*0.55, size*0.5, size*0.75, size*0.7], fill=(90, 75, 60))
+        draw.arc([size*0.05, size*0.05, size*0.95, size*0.95],
+                 start=0, end=180, fill=(255, 150, 50), width=2)
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_asteroid_texture(size=50):
+        """Vytvoří texturu asteroidu"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        points = [(size*0.5, size*0.05), (size*0.85, size*0.3),
+                  (size*0.9, size*0.7), (size*0.6, size*0.95),
+                  (size*0.2, size*0.85), (size*0.05, size*0.5),
+                  (size*0.15, size*0.2)]
+        draw.polygon(points, fill=(100, 90, 75), outline=(70, 60, 50), width=2)
+        draw.ellipse([size*0.3, size*0.3, size*0.5, size*0.5], fill=(80, 70, 58))
+        draw.ellipse([size*0.55, size*0.55, size*0.7, size*0.7], fill=(85, 75, 62))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_planet_food_texture(size=80):
+        """Vytvoří texturu planety ke sežrání"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
+                     fill=(60, 130, 60), outline=(40, 90, 40), width=2)
+        draw.ellipse([size*0.2, size*0.2, size*0.6, size*0.5], fill=(80, 160, 80))
+        draw.ellipse([size*0.5, size*0.45, size*0.8, size*0.7], fill=(80, 160, 80))
+        draw.arc([size*0.02, size*0.02, size*0.98, size*0.98],
+                 start=0, end=360, fill=(100, 200, 255), width=2)
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_small_planet_texture(size=50):
+        """Vytvoří texturu malé planety"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
+                     fill=(180, 120, 60), outline=(140, 90, 40), width=2)
+        draw.ellipse([size*0.2, size*0.3, size*0.5, size*0.6], fill=(160, 100, 50))
+        draw.arc([size*0.02, size*0.02, size*0.98, size*0.98],
+                 start=0, end=360, fill=(200, 160, 100), width=1)
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_gas_planet_texture(size=60):
+        """Vytvoří texturu plynného obra"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
+                     fill=(180, 140, 80), outline=(140, 100, 50), width=2)
+        for i in range(5):
+            y = size*0.2 + i * size*0.12
+            colors = [(200, 160, 90), (160, 120, 70), (190, 150, 85)]
+            draw.rectangle([size*0.1, y, size*0.9, y + size*0.06], fill=colors[i % 3])
+        draw.arc([int(size*-0.1), int(size*0.35), int(size*1.1), int(size*0.65)],
+                 start=0, end=360, fill=(200, 180, 140), width=2)
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_ice_planet_texture(size=50):
+        """Vytvoří texturu ledové planety"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
+                     fill=(160, 200, 240), outline=(120, 160, 200), width=2)
+        draw.ellipse([size*0.15, size*0.1, size*0.55, size*0.4], fill=(200, 230, 255))
+        draw.ellipse([size*0.4, size*0.5, size*0.8, size*0.8], fill=(180, 210, 240))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
+    @staticmethod
+    def create_lava_planet_texture(size=50):
+        """Vytvoří texturu lávové planety"""
+        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
+                     fill=(180, 60, 20), outline=(140, 40, 10), width=2)
+        draw.arc([size*0.2, size*0.2, size*0.7, size*0.6],
+                 start=30, end=200, fill=(255, 180, 50), width=3)
+        draw.arc([size*0.4, size*0.5, size*0.9, size*0.85],
+                 start=0, end=160, fill=(255, 150, 30), width=2)
+        draw.ellipse([size*0.3, size*0.35, size*0.5, size*0.55], fill=(255, 200, 80))
+        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
+
 class TextureManager:
     """Správa textur"""
     def __init__(self):
@@ -983,6 +1181,21 @@ class TextureManager:
             "alien_child": (40, TextureGenerator.create_alien_child_texture),
             "alien_farmer": (40, TextureGenerator.create_alien_farmer_texture),
             "alien_merchant": (40, TextureGenerator.create_alien_merchant_texture),
+            "alien_building": (50, TextureGenerator.create_alien_building_texture),
+            "alien_tower": (50, TextureGenerator.create_alien_tower_texture),
+            "alien_dome": (50, TextureGenerator.create_alien_dome_texture),
+            "alien_factory": (50, TextureGenerator.create_alien_factory_texture),
+            "mountain_chunk": (60, TextureGenerator.create_mountain_chunk_texture),
+            "giant_tree": (60, TextureGenerator.create_giant_tree_texture),
+            "giant_crystal": (60, TextureGenerator.create_giant_crystal_texture),
+            "lake": (60, TextureGenerator.create_lake_texture),
+            "meteorite": (40, TextureGenerator.create_meteorite_texture),
+            "asteroid": (50, TextureGenerator.create_asteroid_texture),
+            "planet_food": (80, TextureGenerator.create_planet_food_texture),
+            "small_planet": (50, TextureGenerator.create_small_planet_texture),
+            "gas_planet": (60, TextureGenerator.create_gas_planet_texture),
+            "ice_planet": (50, TextureGenerator.create_ice_planet_texture),
+            "lava_planet": (50, TextureGenerator.create_lava_planet_texture),
         }
         
         for name, (size, generator_func) in texture_configs.items():
@@ -1144,57 +1357,41 @@ class LevelSelect:
         self.running = True
         self.texture_manager = texture_manager
         
-        self.font_title = pygame.font.Font(None, 70)
-        self.font_button = pygame.font.Font(None, 42)
-        self.font_desc = pygame.font.Font(None, 28)
+        self.font_title = pygame.font.Font(None, 60)
+        self.font_button = pygame.font.Font(None, 32)
+        self.font_desc = pygame.font.Font(None, 22)
         
-        button_width = 350
-        button_height = 80
+        button_width = 300
+        button_height = 55
         center_x = SCREEN_WIDTH // 2
-        gap = 20
+        gap = 16
+        row_gap = 72
+        start_y = 100
         
-        # Řada 1: Level 1 a Level 2
-        row1_y = 180
-        self.level1_button = Button(
-            center_x - button_width - gap // 2, row1_y, button_width, button_height,
-            "Level 1: Laboratoř",
-            self.font_button,
-            WHITE,
-            (60, 130, 80),
-            (80, 180, 100)
-        )
+        level_data = [
+            ("Level 1: Laboratoř", (60, 130, 80), (80, 180, 100)),
+            ("Level 2: Řídící Centrum", (40, 80, 160), (60, 120, 200)),
+            ("Level 3: Cizí Planeta", (140, 60, 160), (180, 90, 200)),
+            ("Level 4: Vesnice", (180, 100, 40), (220, 140, 60)),
+            ("Level 5: Mimoz. Město", (120, 40, 140), (160, 70, 180)),
+            ("Level 6: Obří Kočka", (60, 140, 50), (90, 180, 70)),
+            ("Level 7: Vesmír", (40, 50, 140), (60, 80, 200)),
+            ("Level 8: Požírač Planet", (180, 80, 20), (220, 120, 40)),
+        ]
         
-        self.level2_button = Button(
-            center_x + gap // 2, row1_y, button_width, button_height,
-            "Level 2: Řídící Centrum",
-            self.font_button,
-            WHITE,
-            (40, 80, 160),
-            (60, 120, 200)
-        )
-        
-        # Řada 2: Level 3 a Level 4
-        row2_y = 340
-        self.level3_button = Button(
-            center_x - button_width - gap // 2, row2_y, button_width, button_height,
-            "Level 3: Cizí Planeta",
-            self.font_button,
-            WHITE,
-            (140, 60, 160),
-            (180, 90, 200)
-        )
-        
-        self.level4_button = Button(
-            center_x + gap // 2, row2_y, button_width, button_height,
-            "Level 4: Vesnice",
-            self.font_button,
-            WHITE,
-            (180, 100, 40),
-            (220, 140, 60)
-        )
+        self.level_buttons = []
+        for i, (text, color, hover) in enumerate(level_data):
+            row = i // 2
+            col = i % 2
+            bx = center_x - button_width - gap // 2 if col == 0 else center_x + gap // 2
+            by = start_y + row * row_gap
+            self.level_buttons.append(Button(
+                bx, by, button_width, button_height, text,
+                self.font_button, WHITE, color, hover
+            ))
         
         self.back_button = Button(
-            center_x - 100, 520, 200, 60,
+            center_x - 100, start_y + 4 * row_gap + 10, 200, 50,
             "ZPĚT",
             self.font_button,
             WHITE,
@@ -1202,20 +1399,32 @@ class LevelSelect:
             (180, 80, 80)
         )
         
-        # Pulsující hvězdy na pozadí
+        self.level_descs = [
+            "Sněz 50 malých věcí v laboratoři",
+            "Sněz 50 velkých věcí v řídícím centru",
+            "Sněz 50 zvláštních rostlin na planetě",
+            "Sežer 50 mimozemšťanů ve vesnici!",
+            "Žer baráky v mimozemském městě!",
+            "Obří kočka jí hory, stromy a jezera!",
+            "Jez meteority, na vel. 40 sněz planetu!",
+            "Sežer všechny okolní planety!",
+        ]
+        self.desc_colors = [
+            (180, 200, 180), (160, 180, 220), (200, 170, 220), (240, 180, 100),
+            (220, 150, 240), (180, 240, 160), (160, 170, 255), (255, 180, 100),
+        ]
+        
         self.stars = [(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT),
                        random.random() * 2 + 0.5) for _ in range(120)]
         self.star_timer = 0
     
     def draw_background(self):
-        # Tmavý vesmírný gradient
         for y in range(SCREEN_HEIGHT):
             r = int(10 + 20 * (y / SCREEN_HEIGHT))
             g = int(12 + 25 * (y / SCREEN_HEIGHT))
             b = int(30 + 40 * (y / SCREEN_HEIGHT))
             pygame.draw.line(self.screen, (r, g, b), (0, y), (SCREEN_WIDTH, y))
         
-        # Hvězdy
         self.star_timer += 0.02
         for sx, sy, brightness in self.stars:
             alpha = int(128 + 127 * math.sin(self.star_timer * brightness))
@@ -1235,14 +1444,9 @@ class LevelSelect:
                 return "quit"
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                if self.level1_button.is_clicked(pos):
-                    return "level1"
-                if self.level2_button.is_clicked(pos):
-                    return "level2"
-                if self.level3_button.is_clicked(pos):
-                    return "level3"
-                if self.level4_button.is_clicked(pos):
-                    return "level4"
+                for i, btn in enumerate(self.level_buttons):
+                    if btn.is_clicked(pos):
+                        return f"level{i + 1}"
                 if self.back_button.is_clicked(pos):
                     return "back"
             if event.type == pygame.KEYDOWN:
@@ -1252,55 +1456,33 @@ class LevelSelect:
     
     def update(self):
         pos = pygame.mouse.get_pos()
-        self.level1_button.check_hover(pos)
-        self.level2_button.check_hover(pos)
-        self.level3_button.check_hover(pos)
-        self.level4_button.check_hover(pos)
+        for btn in self.level_buttons:
+            btn.check_hover(pos)
         self.back_button.check_hover(pos)
     
     def draw(self):
         self.draw_background()
         
         title_text = self.font_title.render("Vyber si Level", True, WHITE)
-        title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 80))
+        title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 50))
         self.screen.blit(title_text, title_rect)
         
-        # Ikonka kočky
-        cat_texture = self.texture_manager.get_texture("cat")
-        if cat_texture:
-            scaled_cat = pygame.transform.scale(cat_texture, (100, 100))
-            cat_rect = scaled_cat.get_rect(center=(SCREEN_WIDTH // 2, 190))
-            self.screen.blit(scaled_cat, cat_rect)
-        
-        self.level1_button.draw(self.screen)
-        self.level2_button.draw(self.screen)
-        self.level3_button.draw(self.screen)
-        self.level4_button.draw(self.screen)
+        for btn in self.level_buttons:
+            btn.draw(self.screen)
         self.back_button.draw(self.screen)
         
         # Popisy levelů
-        desc1 = self.font_desc.render("Sněz 50 malých věcí v laboratoři", True, (180, 200, 180))
-        desc1_rect = desc1.get_rect(center=(self.level1_button.rect.centerx, self.level1_button.rect.bottom + 15))
-        self.screen.blit(desc1, desc1_rect)
-        
-        desc2 = self.font_desc.render("Sněz 50 velkých věcí v řídícím centru", True, (160, 180, 220))
-        desc2_rect = desc2.get_rect(center=(self.level2_button.rect.centerx, self.level2_button.rect.bottom + 15))
-        self.screen.blit(desc2, desc2_rect)
-        
-        desc3 = self.font_desc.render("Sněz 50 zvláštních rostlin na planetě", True, (200, 170, 220))
-        desc3_rect = desc3.get_rect(center=(self.level3_button.rect.centerx, self.level3_button.rect.bottom + 15))
-        self.screen.blit(desc3, desc3_rect)
-        
-        desc4 = self.font_desc.render("Sežer 50 mimozemšťanů ve vesnici!", True, (240, 180, 100))
-        desc4_rect = desc4.get_rect(center=(self.level4_button.rect.centerx, self.level4_button.rect.bottom + 15))
-        self.screen.blit(desc4, desc4_rect)
+        for i, btn in enumerate(self.level_buttons):
+            desc = self.font_desc.render(self.level_descs[i], True, self.desc_colors[i])
+            desc_rect = desc.get_rect(center=(btn.rect.centerx, btn.rect.bottom + 10))
+            self.screen.blit(desc, desc_rect)
         
         pygame.display.flip()
     
     def run(self):
         while self.running:
             result = self.handle_events()
-            if result in ("level1", "level2", "level3", "level4", "back", "quit"):
+            if result and (result.startswith("level") or result in ("back", "quit")):
                 return result
             self.update()
             self.draw()
@@ -1352,6 +1534,8 @@ class AlienCat:
         self.vy = 0
         self.speed = 5
         self.food_eaten = 0
+        self.max_size = MAX_CAT_SIZE
+        self.growth_per_food = 3
         self.animation_counter = 0
         self.animation_walk = 0
         self.texture_manager = texture_manager
@@ -1381,8 +1565,8 @@ class AlienCat:
             self.animation_walk += 0.2
     
     def eat_food(self, food):
-        if self.size < MAX_CAT_SIZE:
-            self.size += 3
+        if self.size < self.max_size:
+            self.size += self.growth_per_food
             self.food_eaten += 1
             self.speed = max(2.5, 5 - (self.size - BASE_CAT_SIZE) / 60)
         else:
@@ -2485,6 +2669,661 @@ class GameLevel4:
         return "won" if self.won else "quit"
 
 
+class GameLevel5:
+    """Level 5 - Mimozemské Město (kočka žere baráky)"""
+    FOOD_GOAL = 50
+
+    def __init__(self, texture_manager):
+        self.screen = pygame.display.get_surface()
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.won = False
+        self.texture_manager = texture_manager
+
+        self.cat = AlienCat(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, texture_manager)
+        self.cat.size = 55
+        self.cat.speed = 4.5
+        self.cat.max_size = 300
+        self.foods = []
+        self.bg_surface = self._build_background()
+        self.spawn_food()
+
+        self.neon_timer = 0
+        self.neon_signs = []
+        for _ in range(10):
+            self.neon_signs.append([
+                random.randint(50, SCREEN_WIDTH - 50),
+                random.randint(135, 155),
+                random.random() * 3 + 1,
+                random.choice([(255, 50, 200), (50, 255, 200), (255, 255, 50), (50, 200, 255)])
+            ])
+
+    def spawn_food(self):
+        for _ in range(8):
+            x = random.randint(60, SCREEN_WIDTH - 60)
+            y = random.randint(170, SCREEN_HEIGHT - 60)
+            food_type = random.choice(["alien_building", "alien_tower", "alien_dome", "alien_factory"])
+            food = Food(x, y, food_type, self.texture_manager)
+            food.width = random.randint(55, 85)
+            food.height = random.randint(55, 85)
+            self.foods.append(food)
+
+    def _build_background(self):
+        bg = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        sky_height = 130
+
+        # Fialová obloha města
+        for y in range(sky_height):
+            factor = y / sky_height
+            r = int(30 + 60 * factor)
+            g = int(10 + 20 * factor)
+            b = int(60 + 50 * (1 - factor))
+            pygame.draw.line(bg, (r, g, b), (0, y), (SCREEN_WIDTH, y))
+
+        # Hvězdy
+        for _ in range(60):
+            sx = random.randint(0, SCREEN_WIDTH)
+            sy = random.randint(0, sky_height - 10)
+            brightness = random.randint(100, 255)
+            bg.set_at((sx, sy), (brightness, brightness, min(255, brightness + 30)))
+
+        # Siluety vzdálených budov na horizontu
+        for bx in range(0, SCREEN_WIDTH, 40):
+            bh = random.randint(20, 70)
+            bw = random.randint(25, 38)
+            pygame.draw.rect(bg, (40, 25, 60), (bx, sky_height - bh, bw, bh))
+            pygame.draw.rect(bg, (50, 30, 70), (bx, sky_height - bh, bw, bh), 1)
+            # Okna
+            for wy in range(sky_height - bh + 4, sky_height - 4, 10):
+                for wx in range(bx + 3, bx + bw - 5, 8):
+                    if random.random() > 0.3:
+                        wc = random.choice([(200, 255, 180), (255, 200, 100), (150, 200, 255)])
+                        bg.set_at((wx, wy), wc)
+                        bg.set_at((wx + 1, wy), wc)
+                        bg.set_at((wx, wy + 1), wc)
+                        bg.set_at((wx + 1, wy + 1), wc)
+
+        pygame.draw.line(bg, (150, 50, 200), (0, sky_height), (SCREEN_WIDTH, sky_height), 2)
+
+        # Podlaha města - kovový povrch
+        for y in range(sky_height + 2, SCREEN_HEIGHT):
+            noise = random.randint(-3, 3)
+            r = max(0, min(255, 50 + noise))
+            g = max(0, min(255, 40 + noise))
+            b = max(0, min(255, 65 + noise))
+            pygame.draw.line(bg, (r, g, b), (0, y), (SCREEN_WIDTH, y))
+
+        # Silnice/cesty
+        road_y = SCREEN_HEIGHT // 2 + 50
+        pygame.draw.rect(bg, (35, 30, 45), (0, road_y, SCREEN_WIDTH, 30))
+        for lx in range(0, SCREEN_WIDTH, 40):
+            pygame.draw.rect(bg, (200, 180, 50), (lx, road_y + 13, 20, 4))
+
+        return bg
+
+    def draw_city_hud(self):
+        self.screen.blit(self.bg_surface, (0, 0))
+
+        self.neon_timer += 0.03
+        for s in self.neon_signs:
+            alpha = int(150 + 100 * math.sin(self.neon_timer * s[2]))
+            neon_surf = pygame.Surface((12, 12), pygame.SRCALPHA)
+            pygame.draw.circle(neon_surf, (*s[3][:3], max(0, min(255, alpha))), (6, 6), 6)
+            self.screen.blit(neon_surf, (int(s[0]) - 6, int(s[1]) - 6))
+
+        font_small = pygame.font.Font(None, 28)
+        font_title = pygame.font.Font(None, 36)
+
+        title_text = font_title.render("Level 5: Mimozemské Město", True, (255, 100, 255))
+        self.screen.blit(title_text, (20, 10))
+
+        size_text = font_small.render(f"Velikost: {self.cat.size:.0f} / {self.cat.max_size}", True, (255, 180, 255))
+        self.screen.blit(size_text, (SCREEN_WIDTH - 350, 15))
+
+        food_text = font_small.render(f"Baráky sežrány: {self.cat.food_eaten} / {self.FOOD_GOAL}", True, (255, 180, 255))
+        self.screen.blit(food_text, (SCREEN_WIDTH - 350, 45))
+
+        progress_width = 300
+        progress_x = SCREEN_WIDTH - 350
+        progress_y = 75
+        pygame.draw.rect(self.screen, (40, 20, 50), (progress_x, progress_y, progress_width, 15))
+        filled_width = min(1.0, self.cat.food_eaten / self.FOOD_GOAL) * progress_width
+        pygame.draw.rect(self.screen, (200, 80, 255), (progress_x, progress_y, filled_width, 15))
+        pygame.draw.rect(self.screen, (255, 100, 255), (progress_x, progress_y, progress_width, 15), 2)
+
+        controls_text = font_small.render("WASD nebo Šipky = Pohyb | ESC = Zpět", True, (140, 100, 160))
+        self.screen.blit(controls_text, (20, SCREEN_HEIGHT - 30))
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+
+    def update(self):
+        keys = pygame.key.get_pressed()
+        self.cat.handle_input(keys)
+        self.cat.update()
+        for food in self.foods:
+            if not food.eaten and food.is_eaten_by(self.cat):
+                self.cat.eat_food(food)
+        if self.cat.food_eaten >= self.FOOD_GOAL:
+            self.won = True
+            self.running = False
+            return
+        alive_foods = sum(1 for f in self.foods if not f.eaten)
+        if alive_foods < 3:
+            self.spawn_food()
+
+    def draw(self):
+        self.screen.fill((30, 20, 45))
+        self.draw_city_hud()
+        for food in self.foods:
+            food.draw(self.screen)
+        self.cat.draw(self.screen)
+        pygame.display.flip()
+
+    def run(self):
+        while self.running:
+            self.handle_events()
+            self.update()
+            self.draw()
+            self.clock.tick(FPS)
+        return "won" if self.won else "quit"
+
+
+class GameLevel6:
+    """Level 6 - Obří Kočka (jí velké věci na planetě - hory, stromy, jezera)"""
+    FOOD_GOAL = 50
+
+    def __init__(self, texture_manager):
+        self.screen = pygame.display.get_surface()
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.won = False
+        self.texture_manager = texture_manager
+
+        self.cat = AlienCat(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, texture_manager)
+        self.cat.size = 80
+        self.cat.speed = 4
+        self.cat.max_size = 400
+        self.cat.growth_per_food = 5
+        self.foods = []
+        self.bg_surface = self._build_background()
+        self.spawn_food()
+        self.quake_timer = 0
+
+    def spawn_food(self):
+        for _ in range(6):
+            x = random.randint(60, SCREEN_WIDTH - 60)
+            y = random.randint(130, SCREEN_HEIGHT - 60)
+            food_type = random.choice(["mountain_chunk", "giant_tree", "giant_crystal", "lake"])
+            food = Food(x, y, food_type, self.texture_manager)
+            food.width = random.randint(70, 110)
+            food.height = random.randint(70, 110)
+            self.foods.append(food)
+
+    def _build_background(self):
+        bg = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        # Pohled z výšky - zeleno-hnědý terén
+        for y in range(SCREEN_HEIGHT):
+            factor = y / SCREEN_HEIGHT
+            r = int(40 + 30 * factor)
+            g = int(80 + 40 * math.sin(factor * 3))
+            b = int(30 + 20 * factor)
+            pygame.draw.line(bg, (r, g, b), (0, y), (SCREEN_WIDTH, y))
+
+        # Terénní skvrny
+        for _ in range(40):
+            sx = random.randint(0, SCREEN_WIDTH)
+            sy = random.randint(0, SCREEN_HEIGHT)
+            sr = random.randint(20, 60)
+            sc = random.choice([(50, 100, 40), (60, 90, 35), (35, 70, 25), (70, 110, 50)])
+            terrain_surf = pygame.Surface((sr * 2, sr * 2), pygame.SRCALPHA)
+            pygame.draw.ellipse(terrain_surf, (*sc, 60), (0, 0, sr * 2, sr * 2))
+            bg.blit(terrain_surf, (sx - sr, sy - sr))
+
+        # Řeky
+        for river_x_base in [300, 800]:
+            for y in range(0, SCREEN_HEIGHT, 2):
+                rx = river_x_base + int(30 * math.sin(y * 0.02))
+                pygame.draw.line(bg, (30, 80, 140), (rx, y), (rx + 8, y), 3)
+
+        return bg
+
+    def draw_giant_hud(self):
+        self.screen.blit(self.bg_surface, (0, 0))
+        self.quake_timer += 0.02
+
+        # Otřesy země při pohybu
+        if self.cat.vx != 0 or self.cat.vy != 0:
+            shake = int(math.sin(self.quake_timer * 20) * 2)
+            self.screen.scroll(shake, 0)
+
+        font_small = pygame.font.Font(None, 28)
+        font_title = pygame.font.Font(None, 36)
+
+        title_text = font_title.render("Level 6: Obří Kočka", True, (200, 255, 150))
+        self.screen.blit(title_text, (20, 10))
+
+        size_text = font_small.render(f"Velikost: {self.cat.size:.0f} / {self.cat.max_size}", True, (200, 255, 150))
+        self.screen.blit(size_text, (SCREEN_WIDTH - 350, 15))
+
+        food_text = font_small.render(f"Sežráno: {self.cat.food_eaten} / {self.FOOD_GOAL}", True, (200, 255, 150))
+        self.screen.blit(food_text, (SCREEN_WIDTH - 350, 45))
+
+        progress_width = 300
+        progress_x = SCREEN_WIDTH - 350
+        progress_y = 75
+        pygame.draw.rect(self.screen, (30, 50, 20), (progress_x, progress_y, progress_width, 15))
+        filled_width = min(1.0, self.cat.food_eaten / self.FOOD_GOAL) * progress_width
+        pygame.draw.rect(self.screen, (100, 200, 80), (progress_x, progress_y, filled_width, 15))
+        pygame.draw.rect(self.screen, (150, 255, 100), (progress_x, progress_y, progress_width, 15), 2)
+
+        controls_text = font_small.render("WASD nebo Šipky = Pohyb | ESC = Zpět", True, (120, 160, 100))
+        self.screen.blit(controls_text, (20, SCREEN_HEIGHT - 30))
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+
+    def update(self):
+        keys = pygame.key.get_pressed()
+        self.cat.handle_input(keys)
+        self.cat.update()
+        for food in self.foods:
+            if not food.eaten and food.is_eaten_by(self.cat):
+                self.cat.eat_food(food)
+        if self.cat.food_eaten >= self.FOOD_GOAL:
+            self.won = True
+            self.running = False
+            return
+        alive_foods = sum(1 for f in self.foods if not f.eaten)
+        if alive_foods < 3:
+            self.spawn_food()
+
+    def draw(self):
+        self.screen.fill((35, 60, 25))
+        self.draw_giant_hud()
+        for food in self.foods:
+            food.draw(self.screen)
+        self.cat.draw(self.screen)
+        pygame.display.flip()
+
+    def run(self):
+        while self.running:
+            self.handle_events()
+            self.update()
+            self.draw()
+            self.clock.tick(FPS)
+        return "won" if self.won else "quit"
+
+
+class GameLevel7:
+    """Level 7 - Vesmír (jí meteority, na velikosti 40 sní planetu → 50)"""
+
+    def __init__(self, texture_manager):
+        self.screen = pygame.display.get_surface()
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.won = False
+        self.texture_manager = texture_manager
+
+        self.cat = AlienCat(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, texture_manager)
+        self.cat.size = 25
+        self.cat.speed = 6
+        self.cat.max_size = 50
+        self.cat.growth_per_food = 2
+        self.foods = []
+        self.planet_spawned = False
+        self.planet_eaten = False
+        self.bg_surface = self._build_background()
+        self.spawn_food()
+
+        self.star_timer = 0
+        self.bg_stars = [(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT),
+                          random.random() * 2 + 0.5) for _ in range(150)]
+
+    def spawn_food(self):
+        for _ in range(10):
+            x = random.randint(60, SCREEN_WIDTH - 60)
+            y = random.randint(60, SCREEN_HEIGHT - 60)
+            food_type = random.choice(["meteorite", "asteroid"])
+            food = Food(x, y, food_type, self.texture_manager)
+            food.width = random.randint(30, 50)
+            food.height = random.randint(30, 50)
+            self.foods.append(food)
+
+    def spawn_planet(self):
+        """Spawne planetu když je kočka dost velká"""
+        x = random.randint(100, SCREEN_WIDTH - 100)
+        y = random.randint(100, SCREEN_HEIGHT - 100)
+        food = Food(x, y, "planet_food", self.texture_manager)
+        food.width = 100
+        food.height = 100
+        self.foods.append(food)
+        self.planet_spawned = True
+
+    def _build_background(self):
+        bg = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        # Hluboký vesmír
+        for y in range(SCREEN_HEIGHT):
+            factor = y / SCREEN_HEIGHT
+            r = int(3 + 8 * factor)
+            g = int(2 + 5 * factor)
+            b = int(12 + 15 * (1 - factor))
+            pygame.draw.line(bg, (r, g, b), (0, y), (SCREEN_WIDTH, y))
+
+        # Hvězdy
+        for _ in range(200):
+            sx = random.randint(0, SCREEN_WIDTH)
+            sy = random.randint(0, SCREEN_HEIGHT)
+            brightness = random.randint(60, 255)
+            color_shift = random.choice([(0, 0, 30), (20, 0, 0), (0, 20, 0), (0, 0, 0)])
+            bg.set_at((sx, sy), (min(255, brightness + color_shift[0]),
+                                  min(255, brightness + color_shift[1]),
+                                  min(255, brightness + color_shift[2])))
+
+        # Mlhoviny
+        for nx, ny, nr in [(200, 150, 80), (800, 400, 100), (500, 550, 70)]:
+            neb_surf = pygame.Surface((nr * 2, nr * 2), pygame.SRCALPHA)
+            neb_color = random.choice([(60, 20, 80, 15), (20, 40, 80, 15), (80, 30, 40, 12)])
+            pygame.draw.ellipse(neb_surf, neb_color, (0, 0, nr * 2, nr * 2))
+            bg.blit(neb_surf, (nx - nr, ny - nr))
+
+        return bg
+
+    def draw_space_hud(self):
+        self.screen.blit(self.bg_surface, (0, 0))
+        self.star_timer += 0.02
+
+        # Blikající hvězdy
+        for sx, sy, br in self.bg_stars:
+            alpha = int(80 + 80 * math.sin(self.star_timer * br))
+            alpha = max(0, min(255, alpha))
+            self.screen.set_at((int(sx), int(sy)), (alpha, alpha, min(255, alpha + 20)))
+
+        font_small = pygame.font.Font(None, 28)
+        font_title = pygame.font.Font(None, 36)
+
+        title_text = font_title.render("Level 7: Vesmír", True, (200, 200, 255))
+        self.screen.blit(title_text, (20, 10))
+
+        size_text = font_small.render(f"Velikost: {self.cat.size:.0f}", True, (180, 180, 255))
+        self.screen.blit(size_text, (SCREEN_WIDTH - 350, 15))
+
+        if not self.planet_eaten:
+            if self.cat.size >= 40:
+                hint = font_small.render("! PLANETA SE OBJEVILA - SEŽER JI !", True, (255, 255, 100))
+            else:
+                hint = font_small.render(f"Jez meteority! Na vel. 40 sníš planetu (nyní: {self.cat.size:.0f})", True, (180, 180, 255))
+            self.screen.blit(hint, (SCREEN_WIDTH - 500, 45))
+        else:
+            hint = font_small.render("Planeta sežrána! Velikost 50!", True, (100, 255, 100))
+            self.screen.blit(hint, (SCREEN_WIDTH - 350, 45))
+
+        # Progress bar k velikosti 40 (pak k 50)
+        progress_width = 300
+        progress_x = SCREEN_WIDTH - 350
+        progress_y = 75
+        pygame.draw.rect(self.screen, (15, 15, 40), (progress_x, progress_y, progress_width, 15))
+        if self.cat.size < 40:
+            filled = min(1.0, (self.cat.size - 25) / 15) * progress_width
+            pygame.draw.rect(self.screen, (100, 100, 255), (progress_x, progress_y, filled, 15))
+        else:
+            filled = min(1.0, (self.cat.size - 25) / 25) * progress_width
+            pygame.draw.rect(self.screen, (100, 255, 100), (progress_x, progress_y, filled, 15))
+        pygame.draw.rect(self.screen, (150, 150, 255), (progress_x, progress_y, progress_width, 15), 2)
+        # Značka na 40
+        mark_x = progress_x + int((15 / 25) * progress_width)
+        pygame.draw.line(self.screen, (255, 255, 100), (mark_x, progress_y - 3), (mark_x, progress_y + 18), 2)
+
+        controls_text = font_small.render("WASD nebo Šipky = Pohyb | ESC = Zpět", True, (100, 100, 140))
+        self.screen.blit(controls_text, (20, SCREEN_HEIGHT - 30))
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+
+    def update(self):
+        keys = pygame.key.get_pressed()
+        self.cat.handle_input(keys)
+        self.cat.update()
+
+        for food in self.foods:
+            if food.eaten:
+                continue
+            if food.food_type == "planet_food":
+                # Planetu lze sníst jen při velikosti >= 40
+                if self.cat.size >= 40 and food.is_eaten_by(self.cat):
+                    food.eaten = True
+                    self.cat.size = 50
+                    self.cat.food_eaten += 1
+                    self.planet_eaten = True
+            else:
+                if food.is_eaten_by(self.cat):
+                    self.cat.eat_food(food)
+
+        # Spawn planety když kočka >= 40
+        if self.cat.size >= 40 and not self.planet_spawned:
+            self.spawn_planet()
+
+        # Win: kočka sežrala planetu (velikost >= 50)
+        if self.planet_eaten:
+            self.won = True
+            self.running = False
+            return
+
+        alive_foods = sum(1 for f in self.foods if not f.eaten and f.food_type != "planet_food")
+        if alive_foods < 5:
+            self.spawn_food()
+
+    def draw(self):
+        self.screen.fill((5, 3, 15))
+        self.draw_space_hud()
+        for food in self.foods:
+            if not food.eaten and food.food_type == "planet_food":
+                # Pulzující záře kolem planety
+                glow_r = 60 + int(10 * math.sin(self.star_timer * 3))
+                glow_surf = pygame.Surface((glow_r * 2, glow_r * 2), pygame.SRCALPHA)
+                pygame.draw.circle(glow_surf, (100, 255, 100, 30), (glow_r, glow_r), glow_r)
+                self.screen.blit(glow_surf, (food.x + food.width // 2 - glow_r,
+                                              food.y + food.height // 2 - glow_r))
+            food.draw(self.screen)
+        self.cat.draw(self.screen)
+        pygame.display.flip()
+
+    def run(self):
+        while self.running:
+            self.handle_events()
+            self.update()
+            self.draw()
+            self.clock.tick(FPS)
+        return "won" if self.won else "quit"
+
+
+class GameLevel8:
+    """Level 8 - Požírač Planet (kočka jí okolní planety)"""
+    FOOD_GOAL = 30
+
+    def __init__(self, texture_manager):
+        self.screen = pygame.display.get_surface()
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.won = False
+        self.texture_manager = texture_manager
+
+        self.cat = AlienCat(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, texture_manager)
+        self.cat.size = 50
+        self.cat.speed = 5
+        self.cat.max_size = 500
+        self.cat.growth_per_food = 8
+        self.foods = []
+        self.bg_surface = self._build_background()
+        self.spawn_food()
+
+        self.star_timer = 0
+        self.bg_stars = [(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT),
+                          random.random() * 2 + 0.5) for _ in range(200)]
+        # Centrální hvězda (slunce)
+        self.sun_x = SCREEN_WIDTH // 2
+        self.sun_y = SCREEN_HEIGHT // 2
+
+    def spawn_food(self):
+        for _ in range(5):
+            x = random.randint(80, SCREEN_WIDTH - 80)
+            y = random.randint(80, SCREEN_HEIGHT - 80)
+            food_type = random.choice(["small_planet", "gas_planet", "ice_planet", "lava_planet"])
+            food = Food(x, y, food_type, self.texture_manager)
+            if food_type == "gas_planet":
+                food.width = random.randint(70, 100)
+                food.height = random.randint(70, 100)
+            else:
+                food.width = random.randint(50, 80)
+                food.height = random.randint(50, 80)
+            self.foods.append(food)
+
+    def _build_background(self):
+        bg = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        # Temný vesmír
+        bg.fill((2, 1, 8))
+
+        # Hvězdy
+        for _ in range(300):
+            sx = random.randint(0, SCREEN_WIDTH)
+            sy = random.randint(0, SCREEN_HEIGHT)
+            brightness = random.randint(40, 255)
+            color = random.choice([(brightness, brightness, min(255, brightness + 30)),
+                                    (min(255, brightness + 20), brightness, brightness),
+                                    (brightness, brightness, brightness)])
+            bg.set_at((sx, sy), color)
+
+        # Centrální hvězda (slunce systému)
+        sun_cx, sun_cy = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
+        for r in range(60, 0, -1):
+            alpha = int(255 * (1 - r / 60))
+            glow_surf = pygame.Surface((r * 2, r * 2), pygame.SRCALPHA)
+            pygame.draw.circle(glow_surf, (255, 200, 50, min(255, alpha // 3)), (r, r), r)
+            bg.blit(glow_surf, (sun_cx - r, sun_cy - r))
+        pygame.draw.circle(bg, (255, 240, 150), (sun_cx, sun_cy), 18)
+        pygame.draw.circle(bg, (255, 255, 220), (sun_cx, sun_cy), 10)
+
+        # Orbitální dráhy
+        for orbit_r in [120, 200, 300, 420]:
+            orbit_surf = pygame.Surface((orbit_r * 2, orbit_r * 2), pygame.SRCALPHA)
+            pygame.draw.circle(orbit_surf, (40, 40, 60, 40), (orbit_r, orbit_r), orbit_r, 1)
+            bg.blit(orbit_surf, (sun_cx - orbit_r, sun_cy - orbit_r))
+
+        return bg
+
+    def draw_devourer_hud(self):
+        self.screen.blit(self.bg_surface, (0, 0))
+        self.star_timer += 0.02
+
+        # Blikající hvězdy
+        for sx, sy, br in self.bg_stars:
+            alpha = int(60 + 60 * math.sin(self.star_timer * br))
+            alpha = max(0, min(255, alpha))
+            self.screen.set_at((int(sx), int(sy)), (alpha, alpha, min(255, alpha + 15)))
+
+        # Pulzující záře centrální hvězdy
+        pulse = int(5 * math.sin(self.star_timer * 2))
+        glow_r = 30 + pulse
+        glow_surf = pygame.Surface((glow_r * 2, glow_r * 2), pygame.SRCALPHA)
+        pygame.draw.circle(glow_surf, (255, 200, 50, 40), (glow_r, glow_r), glow_r)
+        self.screen.blit(glow_surf, (self.sun_x - glow_r, self.sun_y - glow_r))
+
+        font_small = pygame.font.Font(None, 28)
+        font_title = pygame.font.Font(None, 36)
+
+        title_text = font_title.render("Level 8: Požírač Planet", True, (255, 150, 50))
+        self.screen.blit(title_text, (20, 10))
+
+        size_text = font_small.render(f"Velikost: {self.cat.size:.0f}", True, (255, 200, 100))
+        self.screen.blit(size_text, (SCREEN_WIDTH - 350, 15))
+
+        food_text = font_small.render(f"Planety sežrány: {self.cat.food_eaten} / {self.FOOD_GOAL}", True, (255, 200, 100))
+        self.screen.blit(food_text, (SCREEN_WIDTH - 350, 45))
+
+        progress_width = 300
+        progress_x = SCREEN_WIDTH - 350
+        progress_y = 75
+        pygame.draw.rect(self.screen, (30, 20, 10), (progress_x, progress_y, progress_width, 15))
+        filled_width = min(1.0, self.cat.food_eaten / self.FOOD_GOAL) * progress_width
+        hunger = min(1.0, self.cat.food_eaten / self.FOOD_GOAL)
+        bar_color = (int(255), int(150 - 100 * hunger), int(50 - 40 * hunger))
+        pygame.draw.rect(self.screen, bar_color, (progress_x, progress_y, filled_width, 15))
+        pygame.draw.rect(self.screen, (255, 180, 80), (progress_x, progress_y, progress_width, 15), 2)
+
+        controls_text = font_small.render("WASD nebo Šipky = Pohyb | ESC = Zpět", True, (120, 100, 60))
+        self.screen.blit(controls_text, (20, SCREEN_HEIGHT - 30))
+
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.running = False
+
+    def update(self):
+        keys = pygame.key.get_pressed()
+        self.cat.handle_input(keys)
+        self.cat.update()
+        for food in self.foods:
+            if not food.eaten and food.is_eaten_by(self.cat):
+                self.cat.eat_food(food)
+        if self.cat.food_eaten >= self.FOOD_GOAL:
+            self.won = True
+            self.running = False
+            return
+        alive_foods = sum(1 for f in self.foods if not f.eaten)
+        if alive_foods < 2:
+            self.spawn_food()
+
+    def draw(self):
+        self.screen.fill((2, 1, 8))
+        self.draw_devourer_hud()
+
+        # Glow kolem planet
+        for food in self.foods:
+            if not food.eaten:
+                gr = max(food.width, food.height) // 2 + 10
+                glow_surf = pygame.Surface((gr * 2, gr * 2), pygame.SRCALPHA)
+                color_map = {
+                    "lava_planet": (255, 80, 20, 20),
+                    "ice_planet": (100, 180, 255, 20),
+                    "gas_planet": (200, 170, 80, 20),
+                    "small_planet": (200, 150, 80, 20),
+                }
+                gc = color_map.get(food.food_type, (200, 200, 200, 20))
+                pygame.draw.circle(glow_surf, gc, (gr, gr), gr)
+                self.screen.blit(glow_surf, (food.x + food.width // 2 - gr,
+                                              food.y + food.height // 2 - gr))
+            food.draw(self.screen)
+
+        self.cat.draw(self.screen)
+        pygame.display.flip()
+
+    def run(self):
+        while self.running:
+            self.handle_events()
+            self.update()
+            self.draw()
+            self.clock.tick(FPS)
+        return "won" if self.won else "quit"
+
+
 class LevelComplete:
     """Obrazovka dokončení levelu"""
     def __init__(self, texture_manager, level_name, food_eaten):
@@ -3153,14 +3992,9 @@ if __name__ == "__main__":
         elif state == "levels":
             level_select = LevelSelect(texture_manager)
             result = level_select.run()
-            if result == "level1":
-                state = "game1"
-            elif result == "level2":
-                state = "game2"
-            elif result == "level3":
-                state = "game3"
-            elif result == "level4":
-                state = "game4"
+            if result and result.startswith("level"):
+                level_num = result.replace("level", "")
+                state = f"game{level_num}"
             elif result == "back":
                 state = "menu"
             else:
@@ -3207,6 +4041,46 @@ if __name__ == "__main__":
             result = game4.run()
             if result == "won":
                 lc = LevelComplete(texture_manager, "Vesnice Mimozemšťanů", game4.cat.food_eaten)
+                lc_result = lc.run()
+                state = "levels" if lc_result == "levels" else "quit"
+            else:
+                state = "levels"
+        
+        elif state == "game5":
+            game5 = GameLevel5(texture_manager)
+            result = game5.run()
+            if result == "won":
+                lc = LevelComplete(texture_manager, "Mimozemské Město", game5.cat.food_eaten)
+                lc_result = lc.run()
+                state = "levels" if lc_result == "levels" else "quit"
+            else:
+                state = "levels"
+        
+        elif state == "game6":
+            game6 = GameLevel6(texture_manager)
+            result = game6.run()
+            if result == "won":
+                lc = LevelComplete(texture_manager, "Obří Kočka", game6.cat.food_eaten)
+                lc_result = lc.run()
+                state = "levels" if lc_result == "levels" else "quit"
+            else:
+                state = "levels"
+        
+        elif state == "game7":
+            game7 = GameLevel7(texture_manager)
+            result = game7.run()
+            if result == "won":
+                lc = LevelComplete(texture_manager, "Vesmír", game7.cat.food_eaten)
+                lc_result = lc.run()
+                state = "levels" if lc_result == "levels" else "quit"
+            else:
+                state = "levels"
+        
+        elif state == "game8":
+            game8 = GameLevel8(texture_manager)
+            result = game8.run()
+            if result == "won":
+                lc = LevelComplete(texture_manager, "Požírač Planet", game8.cat.food_eaten)
                 lc_result = lc.run()
                 state = "levels" if lc_result == "levels" else "quit"
             else:
