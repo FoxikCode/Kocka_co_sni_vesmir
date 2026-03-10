@@ -1198,10 +1198,15 @@ class TextureManager:
             "lava_planet": (50, TextureGenerator.create_lava_planet_texture),
         }
         
+        # Vytvoř složku assets pokud neexistuje
+        if not os.path.exists(self.assets_path):
+            os.makedirs(self.assets_path)
+            print(f"[INFO] Vytvorena slozka assets: {self.assets_path}")
+        
         for name, (size, generator_func) in texture_configs.items():
             # Pokus se nahrát ze složky assets
-            if os.path.exists(self.assets_path):
-                path = os.path.join(self.assets_path, f"{name}.png")
+            path = os.path.join(self.assets_path, f"{name}.png")
+            if os.path.exists(path):
                 try:
                     texture = pygame.image.load(path).convert_alpha()
                     self.textures[name] = texture
@@ -1210,11 +1215,12 @@ class TextureManager:
                 except:
                     pass
             
-            # Vygeneruj texturu
+            # Vygeneruj texturu a ulož do assets
             try:
                 texture = generator_func(size)
                 self.textures[name] = texture
-                print(f"[OK] Textura '{name}' vygenerovana")
+                pygame.image.save(texture, path)
+                print(f"[OK] Textura '{name}' vygenerovana a ulozena do: {path}")
             except Exception as e:
                 print(f"[CHYBA] Chyba pri generovani textury '{name}': {e}")
                 self.textures[name] = None
@@ -2328,6 +2334,56 @@ class GameLevel3:
         return "won" if self.won else "quit"
 
 
+class Guard:
+    """Nepřátelský strážce, který pronásleduje kočku"""
+    def __init__(self, x, y, texture_manager):
+        self.x = x
+        self.y = y
+        self.width = 60
+        self.height = 60
+        self.speed = 2.0
+        self.alive = True
+        self.texture_manager = texture_manager
+        self.damage_cooldown = 0
+
+    def update(self, cat):
+        if not self.alive:
+            return
+        # Pronásledování kočky
+        dx = cat.x - self.x
+        dy = cat.y - self.y
+        dist = math.hypot(dx, dy)
+        if dist > 0:
+            self.x += (dx / dist) * self.speed
+            self.y += (dy / dist) * self.speed
+        if self.damage_cooldown > 0:
+            self.damage_cooldown -= 1
+
+    def collides_with(self, cat):
+        cat_left = cat.x - cat.size
+        cat_right = cat.x + cat.size
+        cat_top = cat.y - cat.size
+        cat_bottom = cat.y + cat.size
+        # Menší hitbox než vizuální velikost (60% šířky/výšky)
+        hb_w = self.width * 0.6
+        hb_h = self.height * 0.6
+        g_left = self.x - hb_w / 2
+        g_right = self.x + hb_w / 2
+        g_top = self.y - hb_h / 2
+        g_bottom = self.y + hb_h / 2
+        return not (g_right < cat_left or g_left > cat_right or
+                    g_bottom < cat_top or g_top > cat_bottom)
+
+    def draw(self, screen):
+        if not self.alive:
+            return
+        texture = self.texture_manager.get_texture("alien_guard")
+        if texture:
+            scaled = pygame.transform.scale(texture, (self.width, self.height))
+            rect = scaled.get_rect(center=(int(self.x), int(self.y)))
+            screen.blit(scaled, rect)
+
+
 class GameLevel4:
     """Level 4 - Vesnice mimozemšťanů (sežer 50 mimozemšťanů)"""
     FOOD_GOAL = 50
@@ -2342,9 +2398,15 @@ class GameLevel4:
         self.cat = AlienCat(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, texture_manager)
         self.cat.size = 45  # Kočka je už dost velká
         self.cat.speed = 5
+        self.cat.hp = 100
+        self.cat.max_hp = 100
         self.foods = []
+        self.guards = []
         self.bg_surface = self._build_background()
         self.spawn_food()
+        self.spawn_guards()
+        self.guard_spawn_timer = 0
+        self.damage_flash = 0
         
         # Efekty vesnice - světélkující částice a kouř z chatek
         self.smoke_particles = []
@@ -2368,19 +2430,30 @@ class GameLevel4:
                     random.randint(60, 100)
                 ])
     
+    def spawn_guards(self):
+        """Spawnuje strážce na okrajích mapy"""
+        for _ in range(3):
+            side = random.choice(["left", "right", "top", "bottom"])
+            if side == "left":
+                x, y = 30, random.randint(170, SCREEN_HEIGHT - 60)
+            elif side == "right":
+                x, y = SCREEN_WIDTH - 30, random.randint(170, SCREEN_HEIGHT - 60)
+            elif side == "top":
+                x, y = random.randint(60, SCREEN_WIDTH - 60), 170
+            else:
+                x, y = random.randint(60, SCREEN_WIDTH - 60), SCREEN_HEIGHT - 30
+            self.guards.append(Guard(x, y, self.texture_manager))
+
     def spawn_food(self):
         for _ in range(8):
             x = random.randint(60, SCREEN_WIDTH - 60)
             y = random.randint(170, SCREEN_HEIGHT - 60)
             food_type = random.choice([
-                "alien_villager", "alien_villager", "alien_guard",
+                "alien_villager", "alien_villager",
                 "alien_child", "alien_farmer", "alien_merchant"
             ])
             food = Food(x, y, food_type, self.texture_manager)
-            if food_type == "alien_guard":
-                food.width = random.randint(55, 70)
-                food.height = random.randint(55, 70)
-            elif food_type == "alien_child":
+            if food_type == "alien_child":
                 food.width = random.randint(25, 35)
                 food.height = random.randint(25, 35)
             elif food_type == "alien_merchant":
@@ -2638,6 +2711,42 @@ class GameLevel4:
             if not food.eaten and food.is_eaten_by(self.cat):
                 self.cat.eat_food(food)
         
+        # Strážci - pronásledování a kolize
+        for guard in self.guards:
+            if not guard.alive:
+                continue
+            guard.update(self.cat)
+            if guard.collides_with(self.cat):
+                if self.cat.food_eaten >= 20:
+                    # Kočka sežrala dost mimozemšťanů - sežere strážce
+                    guard.alive = False
+                    self.cat.food_eaten += 1
+                    self.cat.size += 5
+                else:
+                    # Strážce zraní kočku
+                    if guard.damage_cooldown <= 0:
+                        self.cat.hp -= 10
+                        guard.damage_cooldown = 30  # Cooldown 0.5s při 60 FPS
+                        self.damage_flash = 10
+        
+        # Odstraň mrtvé strážce
+        self.guards = [g for g in self.guards if g.alive]
+        
+        # Spawn nových strážců
+        self.guard_spawn_timer += 1
+        if self.guard_spawn_timer >= 300:  # Každých 5 sekund
+            self.guard_spawn_timer = 0
+            if len(self.guards) < 6:
+                self.spawn_guards_single()
+        
+        # Game over - HP vyčerpáno
+        if self.cat.hp <= 0:
+            self.running = False
+            return
+        
+        if self.damage_flash > 0:
+            self.damage_flash -= 1
+        
         # Win podmínka
         if self.cat.food_eaten >= self.FOOD_GOAL:
             self.won = True
@@ -2648,6 +2757,19 @@ class GameLevel4:
         if alive_foods < 3:
             self.spawn_food()
     
+    def spawn_guards_single(self):
+        """Spawnuje jednoho strážce na kraji mapy"""
+        side = random.choice(["left", "right", "top", "bottom"])
+        if side == "left":
+            x, y = 30, random.randint(170, SCREEN_HEIGHT - 60)
+        elif side == "right":
+            x, y = SCREEN_WIDTH - 30, random.randint(170, SCREEN_HEIGHT - 60)
+        elif side == "top":
+            x, y = random.randint(60, SCREEN_WIDTH - 60), 170
+        else:
+            x, y = random.randint(60, SCREEN_WIDTH - 60), SCREEN_HEIGHT - 30
+        self.guards.append(Guard(x, y, self.texture_manager))
+    
     def draw(self):
         self.screen.fill((40, 30, 20))
         self.draw_village_hud()
@@ -2655,7 +2777,35 @@ class GameLevel4:
         for food in self.foods:
             food.draw(self.screen)
         
+        # Strážci
+        for guard in self.guards:
+            guard.draw(self.screen)
+        
         self.cat.draw(self.screen)
+        
+        # Červený flash při zásahu
+        if self.damage_flash > 0:
+            flash_surf = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+            flash_surf.fill((255, 0, 0, int(40 * (self.damage_flash / 10))))
+            self.screen.blit(flash_surf, (0, 0))
+        
+        # HP bar
+        hp_ratio = max(0, self.cat.hp / self.cat.max_hp)
+        bar_w, bar_h = 200, 16
+        bar_x, bar_y = 20, 45
+        pygame.draw.rect(self.screen, (60, 20, 20), (bar_x, bar_y, bar_w, bar_h))
+        hp_color = (50, 200, 50) if hp_ratio > 0.5 else (200, 200, 50) if hp_ratio > 0.25 else (200, 50, 50)
+        pygame.draw.rect(self.screen, hp_color, (bar_x, bar_y, int(bar_w * hp_ratio), bar_h))
+        pygame.draw.rect(self.screen, (255, 200, 100), (bar_x, bar_y, bar_w, bar_h), 2)
+        font_hp = pygame.font.Font(None, 24)
+        hp_text = font_hp.render(f"HP: {max(0, self.cat.hp)} / {self.cat.max_hp}", True, (255, 255, 255))
+        self.screen.blit(hp_text, (bar_x + 5, bar_y + 1))
+        
+        # Nápověda k počtu sežraných
+        if self.cat.food_eaten < 20:
+            font_hint = pygame.font.Font(None, 26)
+            hint = font_hint.render(f"Sežer 20 mimozemšťanů abys mohl sežrat strážce! ({self.cat.food_eaten}/20)", True, (255, 150, 100))
+            self.screen.blit(hint, (20, SCREEN_HEIGHT - 55))
         
         pygame.display.flip()
     
