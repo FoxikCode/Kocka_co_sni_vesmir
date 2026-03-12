@@ -2,14 +2,13 @@ import pygame
 import random
 import math
 import os
-from PIL import Image, ImageDraw
 
 # Inicializace Pygame
 pygame.init()
 
 # Konstanty
-SCREEN_WIDTH = 1200
-SCREEN_HEIGHT = 700
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
 FPS = 60
 BASE_CAT_SIZE = 40
 MAX_CAT_SIZE = 500
@@ -25,1210 +24,46 @@ ALIEN_GREEN_DARK = (30, 120, 60)
 ALIEN_GREEN_MAIN = (80, 180, 100)
 ALIEN_GREEN_LIGHT = (120, 220, 140)
 
-class TextureGenerator:
-    """Generuje textury automaticky pokud neexistují"""
-    @staticmethod
-    def create_cat_texture(size=100):
-        """Vytvoří texturu kočky"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        
-        # Tělo
-        draw.ellipse([size*0.1, size*0.2, size*0.9, size*0.8], 
-                     fill=(80, 180, 100), outline=(30, 120, 60), width=2)
-        
-        # Hlava
-        head_size = size * 0.4
-        head_y = size * 0.25
-        draw.ellipse([size*0.3, head_y, size*0.7, head_y + head_size], 
-                     fill=(80, 180, 100), outline=(30, 120, 60), width=2)
-        
-        # Oči
-        eye_y = head_y + size * 0.1
-        draw.ellipse([size*0.35, eye_y, size*0.45, eye_y + size*0.1], 
-                     fill=WHITE, outline=BLACK, width=1)
-        draw.ellipse([size*0.55, eye_y, size*0.65, eye_y + size*0.1], 
-                     fill=WHITE, outline=BLACK, width=1)
-        
-        # Pupily
-        draw.ellipse([size*0.38, eye_y + size*0.02, size*0.43, eye_y + size*0.07], 
-                     fill=BLACK)
-        draw.ellipse([size*0.58, eye_y + size*0.02, size*0.63, eye_y + size*0.07], 
-                     fill=BLACK)
-        
-        # Uši
-        ear_left = [(size*0.35, head_y), (size*0.25, head_y - size*0.15), (size*0.4, head_y - size*0.05)]
-        ear_right = [(size*0.65, head_y), (size*0.75, head_y - size*0.15), (size*0.6, head_y - size*0.05)]
-        draw.polygon(ear_left, fill=(80, 180, 100), outline=(30, 120, 60))
-        draw.polygon(ear_right, fill=(80, 180, 100), outline=(30, 120, 60))
-        
-        # Nos
-        draw.ellipse([size*0.45, head_y + size*0.2, size*0.55, head_y + size*0.3], 
-                     fill=(200, 100, 180), outline=(180, 80, 160))
-        
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-    
-    @staticmethod
-    def create_bug_texture(size=20):
-        """Vytvoří texturu brouka"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.2, size*0.3, size*0.8, size*0.8], 
-                     fill=(180, 100, 30), outline=(120, 60, 20))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-    
-    @staticmethod
-    def create_mouse_texture(size=20):
-        """Vytvoří texturu myši"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.1, size*0.2, size*0.9, size*0.9], 
-                     fill=(200, 150, 120), outline=(150, 100, 80))
-        draw.ellipse([size*0.75, size*0.3, size*0.95, size*0.45], 
-                     fill=(200, 150, 120), outline=(150, 100, 80))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-    
-    @staticmethod
-    def create_container_texture(size=20):
-        """Vytvoří texturu kontejneru"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.rectangle([size*0.1, size*0.1, size*0.9, size*0.9], 
-                       fill=(100, 120, 180), outline=(60, 80, 150), width=2)
-        draw.line([(size*0.1, size*0.5), (size*0.9, size*0.5)], fill=(60, 80, 150), width=1)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-    
-    @staticmethod
-    def create_plant_texture(size=20):
-        """Vytvoří texturu rostliny"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.3, size*0.1, size*0.7, size*0.5], 
-                     fill=(100, 180, 80), outline=(70, 150, 50))
-        draw.ellipse([size*0.1, size*0.4, size*0.4, size*0.8], 
-                     fill=(100, 180, 80), outline=(70, 150, 50))
-        draw.ellipse([size*0.6, size*0.4, size*0.9, size*0.8], 
-                     fill=(100, 180, 80), outline=(70, 150, 50))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_lab_floor_texture(size=64):
-        """Vytvoří pixel-art texturu podlahy vesmírné laboratoře"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        pixels = img.load()
-
-        # Základní barvy kovových panelů
-        panel_base = (85, 90, 105)       # tmavě šedý kov
-        panel_light = (110, 115, 130)    # světlejší kov
-        panel_dark = (60, 65, 78)        # tmavší okraj
-        rivet_color = (140, 145, 155)    # nýty
-        rivet_shadow = (50, 55, 65)      # stín nýtu
-        groove_color = (45, 50, 60)      # drážky mezi panely
-        glow_color = (40, 180, 160)      # zeleno-modrý sci-fi glow
-        glow_dim = (25, 100, 90)         # tlumený glow
-        vent_dark = (35, 38, 48)         # větrací mřížka
-        vent_light = (70, 75, 88)        # světlá část mřížky
-
-        # Vyplň základní barvou panelu
-        for y in range(size):
-            for x in range(size):
-                # Jemná variace pro texturu kovu
-                noise = ((x * 7 + y * 13) % 5) - 2
-                r = max(0, min(255, panel_base[0] + noise))
-                g = max(0, min(255, panel_base[1] + noise))
-                b = max(0, min(255, panel_base[2] + noise))
-                pixels[x, y] = (r, g, b, 255)
-
-        # Drážky mezi panely (kříž uprostřed)
-        half = size // 2
-        for i in range(size):
-            # Horizontální drážka
-            pixels[i, half - 1] = groove_color + (255,)
-            pixels[i, half] = groove_color + (255,)
-            if i > 0:
-                pixels[i, half - 2] = panel_dark + (255,)
-            if i < size - 1:
-                pixels[i, half + 1] = panel_light + (255,)
-            # Vertikální drážka
-            pixels[half - 1, i] = groove_color + (255,)
-            pixels[half, i] = groove_color + (255,)
-            if i > 0:
-                pixels[half - 2, i] = panel_dark + (255,)
-            if i < size - 1:
-                pixels[half + 1, i] = panel_light + (255,)
-
-        # Okraj celého tile (pro seamless tiling)
-        for i in range(size):
-            pixels[i, 0] = groove_color + (255,)
-            pixels[i, size - 1] = groove_color + (255,)
-            pixels[0, i] = groove_color + (255,)
-            pixels[size - 1, i] = groove_color + (255,)
-
-        # Nýty v rozích každého sub-panelu
-        rivet_positions = [
-            (4, 4), (half - 5, 4), (4, half - 5), (half - 5, half - 5),
-            (half + 4, 4), (size - 6, 4), (half + 4, half - 5), (size - 6, half - 5),
-            (4, half + 4), (half - 5, half + 4), (4, size - 6), (half - 5, size - 6),
-            (half + 4, half + 4), (size - 6, half + 4), (half + 4, size - 6), (size - 6, size - 6),
-        ]
-        for rx, ry in rivet_positions:
-            pixels[rx, ry] = rivet_color + (255,)
-            pixels[rx + 1, ry] = rivet_color + (255,)
-            pixels[rx, ry + 1] = rivet_color + (255,)
-            pixels[rx + 1, ry + 1] = rivet_shadow + (255,)
-
-        # Sci-fi glow proužek v dolním pravém sub-panelu
-        glow_y = half + half // 2
-        for gx in range(half + 6, size - 6):
-            pixels[gx, glow_y] = glow_color + (255,)
-            pixels[gx, glow_y - 1] = glow_dim + (255,)
-            pixels[gx, glow_y + 1] = glow_dim + (255,)
-
-        # Větrací mřížka v levém horním sub-panelu
-        for vy in range(8, half - 6, 4):
-            for vx in range(8, half - 6):
-                if vy % 4 == 0:
-                    pixels[vx, vy] = vent_dark + (255,)
-                    pixels[vx, vy + 1] = vent_light + (255,)
-
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_lab_wall_texture(size=64):
-        """Vytvoří pixel-art texturu stěny vesmírné laboratoře"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        pixels = img.load()
-
-        # Barvy stěny
-        wall_base = (55, 60, 78)         # tmavý kov stěny
-        wall_light = (75, 80, 98)        # světlejší
-        wall_dark = (40, 44, 58)         # tmavší
-        pipe_main = (90, 95, 110)        # trubka
-        pipe_highlight = (120, 125, 140) # odlesk trubky
-        pipe_shadow = (55, 58, 70)       # stín trubky
-        warning_yellow = (200, 180, 40)  # výstražný pruh
-        warning_dark = (50, 48, 30)      # tmavý pruh
-        bolt_color = (130, 135, 145)     # šrouby
-        screen_bg = (15, 25, 35)         # obrazovka
-        screen_glow = (30, 200, 170)     # glow obrazovky
-        screen_text = (50, 255, 200)     # text na obrazovce
-
-        # Základní výplň stěny
-        for y in range(size):
-            for x in range(size):
-                noise = ((x * 3 + y * 11) % 4) - 1
-                r = max(0, min(255, wall_base[0] + noise))
-                g = max(0, min(255, wall_base[1] + noise))
-                b = max(0, min(255, wall_base[2] + noise))
-                pixels[x, y] = (r, g, b, 255)
-
-        # Horizontální panelové čáry
-        for x in range(size):
-            pixels[x, size // 3] = wall_dark + (255,)
-            pixels[x, size // 3 + 1] = wall_light + (255,)
-            pixels[x, 2 * size // 3] = wall_dark + (255,)
-            pixels[x, 2 * size // 3 + 1] = wall_light + (255,)
-
-        # Trubka nahoře
-        pipe_y = 6
-        for x in range(size):
-            pixels[x, pipe_y] = pipe_shadow + (255,)
-            pixels[x, pipe_y + 1] = pipe_main + (255,)
-            pixels[x, pipe_y + 2] = pipe_highlight + (255,)
-            pixels[x, pipe_y + 3] = pipe_main + (255,)
-            pixels[x, pipe_y + 4] = pipe_shadow + (255,)
-
-        # Šrouby na trubce
-        for bx in [10, 30, 50]:
-            if bx < size:
-                pixels[bx, pipe_y + 2] = bolt_color + (255,)
-                pixels[bx + 1, pipe_y + 2] = bolt_color + (255,)
-
-        # Malá obrazovka / monitor
-        scr_x, scr_y = 6, size // 3 + 5
-        scr_w, scr_h = 18, 12
-        for sy in range(scr_y, scr_y + scr_h):
-            for sx in range(scr_x, scr_x + scr_w):
-                if sx < size and sy < size:
-                    pixels[sx, sy] = screen_bg + (255,)
-        # Okraj obrazovky
-        for sx in range(scr_x - 1, scr_x + scr_w + 1):
-            if 0 <= sx < size:
-                if scr_y - 1 >= 0:
-                    pixels[sx, scr_y - 1] = wall_light + (255,)
-                if scr_y + scr_h < size:
-                    pixels[sx, scr_y + scr_h] = wall_dark + (255,)
-        for sy in range(scr_y - 1, scr_y + scr_h + 1):
-            if 0 <= sy < size:
-                if scr_x - 1 >= 0:
-                    pixels[scr_x - 1, sy] = wall_light + (255,)
-                if scr_x + scr_w < size:
-                    pixels[scr_x + scr_w, sy] = wall_dark + (255,)
-        # Text na obrazovce (pár svítících pixelů)
-        screen_pixels = [
-            (2, 3), (3, 3), (4, 3), (6, 3), (7, 3),
-            (2, 5), (4, 5), (5, 5), (6, 5), (8, 5), (9, 5),
-            (2, 7), (3, 7), (5, 7), (7, 7), (10, 7), (11, 7),
-        ]
-        for spx, spy in screen_pixels:
-            px, py = scr_x + spx, scr_y + spy
-            if 0 <= px < size and 0 <= py < size:
-                pixels[px, py] = screen_text + (255,)
-        # Glow kolem
-        for dx in [-1, 0, 1]:
-            for dy in [-1, 0, 1]:
-                gx, gy = scr_x + scr_w // 2 + dx, scr_y + scr_h + 1 + dy
-                if 0 <= gx < size and 0 <= gy < size:
-                    pixels[gx, gy] = screen_glow + (255,)
-
-        # Výstražný pruh dole
-        stripe_y = 2 * size // 3 + 4
-        for x in range(size):
-            for dy in range(4):
-                if stripe_y + dy < size:
-                    if ((x + dy) // 4) % 2 == 0:
-                        pixels[x, stripe_y + dy] = warning_yellow + (255,)
-                    else:
-                        pixels[x, stripe_y + dy] = warning_dark + (255,)
-
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_chair_texture(size=40):
-        """Vytvoří texturu židle v řídícím centru"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Sedák
-        draw.rectangle([size*0.15, size*0.35, size*0.85, size*0.65],
-                       fill=(60, 60, 80), outline=(40, 40, 60), width=2)
-        # Opěradlo
-        draw.rectangle([size*0.2, size*0.05, size*0.8, size*0.38],
-                       fill=(50, 50, 70), outline=(35, 35, 55), width=2)
-        # Nohy
-        draw.rectangle([size*0.25, size*0.65, size*0.35, size*0.95],
-                       fill=(80, 80, 100), outline=(50, 50, 70))
-        draw.rectangle([size*0.65, size*0.65, size*0.75, size*0.95],
-                       fill=(80, 80, 100), outline=(50, 50, 70))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_screen_texture(size=40):
-        """Vytvoří texturu monitoru/obrazovky"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Rám monitoru
-        draw.rectangle([size*0.05, size*0.05, size*0.95, size*0.75],
-                       fill=(30, 35, 50), outline=(20, 25, 40), width=2)
-        # Obrazovka
-        draw.rectangle([size*0.12, size*0.12, size*0.88, size*0.68],
-                       fill=(10, 30, 45))
-        # Text / data na obrazovce
-        for i in range(3):
-            y = size * 0.2 + i * size * 0.15
-            draw.rectangle([size*0.18, y, size*0.18 + size*(0.4 - i*0.08), y + size*0.06],
-                           fill=(30, 200, 170))
-        # Stoček
-        draw.rectangle([size*0.4, size*0.75, size*0.6, size*0.95],
-                       fill=(60, 65, 80), outline=(40, 45, 60))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_keyboard_texture(size=40):
-        """Vytvoří texturu klávesnice"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Tělo klávesnice
-        draw.rectangle([size*0.05, size*0.3, size*0.95, size*0.7],
-                       fill=(50, 55, 70), outline=(35, 40, 55), width=2)
-        # Klávesy (mřížka)
-        for row in range(3):
-            for col in range(6):
-                kx = size*0.12 + col * size*0.13
-                ky = size*0.35 + row * size*0.1
-                draw.rectangle([kx, ky, kx + size*0.1, ky + size*0.07],
-                               fill=(70, 75, 90), outline=(40, 45, 60))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_cable_texture(size=30):
-        """Vytvoří texturu kabelu"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Křivka kabelu
-        points = []
-        for i in range(size):
-            x = i
-            y = int(size * 0.5 + math.sin(i * 0.4) * size * 0.25)
-            points.append((x, y))
-        if len(points) > 1:
-            draw.line(points, fill=(180, 50, 50), width=3)
-            # Konektory
-            draw.ellipse([0, size*0.35, size*0.15, size*0.65],
-                         fill=(120, 120, 140), outline=(80, 80, 100))
-            draw.ellipse([size*0.85, size*0.25, size, size*0.55],
-                         fill=(120, 120, 140), outline=(80, 80, 100))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_datapad_texture(size=35):
-        """Vytvoří texturu datapadu/tabletu"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Tělo
-        draw.rectangle([size*0.15, size*0.05, size*0.85, size*0.95],
-                       fill=(45, 50, 65), outline=(30, 35, 50), width=2)
-        # Display
-        draw.rectangle([size*0.22, size*0.12, size*0.78, size*0.75],
-                       fill=(15, 40, 55))
-        # Data čáry
-        for i in range(4):
-            y = size * 0.2 + i * size * 0.12
-            draw.rectangle([size*0.28, y, size*0.28 + size*(0.35 - i*0.05), y + size*0.05],
-                           fill=(50, 220, 180))
-        # Tlačítko
-        draw.ellipse([size*0.4, size*0.8, size*0.6, size*0.9],
-                     fill=(80, 85, 100), outline=(60, 65, 80))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_mushroom_texture(size=40):
-        """Vytvoří texturu zvláštní mimozemské houby"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Stonek
-        draw.rectangle([size*0.4, size*0.5, size*0.6, size*0.95],
-                       fill=(120, 60, 180), outline=(80, 40, 140), width=1)
-        # Klobouk - velký svítivý
-        draw.ellipse([size*0.05, size*0.1, size*0.95, size*0.6],
-                     fill=(200, 50, 220), outline=(150, 30, 170), width=2)
-        # Tečky na klobouku
-        for spot in [(0.25, 0.3), (0.55, 0.25), (0.7, 0.4), (0.35, 0.45)]:
-            sx, sy = int(size * spot[0]), int(size * spot[1])
-            draw.ellipse([sx, sy, sx + size*0.12, sy + size*0.1],
-                         fill=(255, 180, 255))
-        # Svítivý efekt
-        draw.ellipse([size*0.2, size*0.2, size*0.8, size*0.5],
-                     outline=(255, 150, 255), width=1)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_vine_texture(size=40):
-        """Vytvoří texturu mimozemské liány s chapadly"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Hlavní stonek - vlnitý
-        points_main = []
-        for i in range(size):
-            x = int(size * 0.5 + math.sin(i * 0.3) * size * 0.15)
-            points_main.append((x, i))
-        if len(points_main) > 1:
-            draw.line(points_main, fill=(30, 180, 120), width=4)
-        # Listy / chapadla
-        for ly in [0.2, 0.45, 0.7]:
-            lx = int(size * 0.5 + math.sin(ly * size * 0.3) * size * 0.15)
-            draw.ellipse([lx - size*0.2, size*ly - size*0.08, lx + size*0.15, size*ly + size*0.12],
-                         fill=(50, 255, 130), outline=(20, 200, 90))
-            draw.ellipse([lx + size*0.05, size*ly - size*0.05, lx + size*0.35, size*ly + size*0.1],
-                         fill=(40, 230, 140), outline=(20, 180, 100))
-        # Květ nahoře
-        draw.ellipse([size*0.3, size*0.0, size*0.7, size*0.2],
-                     fill=(255, 100, 50), outline=(200, 60, 30), width=2)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_crystal_flower_texture(size=40):
-        """Vytvoří texturu krystalového květu"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Stonek
-        draw.rectangle([size*0.42, size*0.55, size*0.58, size*0.95],
-                       fill=(60, 200, 200), outline=(40, 160, 160))
-        # Krystalové lístky (trojúhelníky)
-        petals = [
-            [(size*0.5, size*0.05), (size*0.3, size*0.4), (size*0.5, size*0.35)],
-            [(size*0.5, size*0.05), (size*0.7, size*0.4), (size*0.5, size*0.35)],
-            [(size*0.15, size*0.25), (size*0.35, size*0.5), (size*0.3, size*0.25)],
-            [(size*0.85, size*0.25), (size*0.65, size*0.5), (size*0.7, size*0.25)],
-        ]
-        colors = [(80, 220, 255), (100, 180, 255), (60, 240, 230), (120, 200, 255)]
-        for pts, col in zip(petals, colors):
-            draw.polygon(pts, fill=col, outline=(40, 150, 200))
-        # Střed
-        draw.ellipse([size*0.35, size*0.25, size*0.65, size*0.5],
-                     fill=(200, 255, 255), outline=(100, 200, 255), width=2)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_bulb_texture(size=40):
-        """Vytvoří texturu svítivé mimozemské cibulky"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Kořeny dole
-        for rx in [0.3, 0.45, 0.6]:
-            draw.line([(size*rx, size*0.8), (size*(rx - 0.05), size*0.98)],
-                      fill=(100, 80, 50), width=2)
-        # Baňka
-        draw.ellipse([size*0.15, size*0.2, size*0.85, size*0.85],
-                     fill=(220, 180, 40), outline=(180, 140, 20), width=2)
-        # Žíly na baňce
-        draw.arc([size*0.25, size*0.3, size*0.6, size*0.75],
-                 start=0, end=180, fill=(255, 220, 80), width=1)
-        draw.arc([size*0.4, size*0.25, size*0.75, size*0.7],
-                 start=0, end=180, fill=(255, 220, 80), width=1)
-        # Svítivý vršek
-        draw.ellipse([size*0.3, size*0.05, size*0.7, size*0.35],
-                     fill=(255, 255, 100), outline=(255, 220, 50), width=2)
-        # Záře
-        draw.ellipse([size*0.35, size*0.1, size*0.65, size*0.3],
-                     fill=(255, 255, 200))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_tentacle_plant_texture(size=40):
-        """Vytvoří texturu chapadlové rostliny"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Základna
-        draw.ellipse([size*0.2, size*0.7, size*0.8, size*0.98],
-                     fill=(80, 40, 100), outline=(60, 25, 80), width=2)
-        # Chapadla
-        tentacle_data = [
-            (0.3, [(0.3, 0.7), (0.15, 0.5), (0.2, 0.3), (0.1, 0.1)]),
-            (0.5, [(0.5, 0.7), (0.5, 0.45), (0.48, 0.2), (0.5, 0.02)]),
-            (0.7, [(0.7, 0.7), (0.85, 0.5), (0.8, 0.3), (0.9, 0.1)]),
-        ]
-        tent_colors = [(160, 50, 200), (180, 70, 220), (140, 40, 180)]
-        for (_, pts), col in zip(tentacle_data, tent_colors):
-            scaled_pts = [(int(size * p[0]), int(size * p[1])) for p in pts]
-            if len(scaled_pts) > 1:
-                draw.line(scaled_pts, fill=col, width=3)
-            # Tip svítí
-            tip = scaled_pts[-1]
-            draw.ellipse([tip[0]-4, tip[1]-4, tip[0]+4, tip[1]+4],
-                         fill=(255, 120, 255), outline=(200, 80, 220))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_planet_floor_texture(size=64):
-        """Vytvoří pixel-art texturu povrchu mimozemské planety"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        pixels = img.load()
-
-        ground_base = (55, 85, 45)
-        ground_light = (70, 110, 55)
-        ground_dark = (35, 60, 30)
-        moss = (80, 140, 60)
-        rock = (90, 80, 70)
-        glow_green = (100, 255, 100)
-        glow_dim = (60, 150, 60)
-
-        for y in range(size):
-            for x in range(size):
-                noise = ((x * 11 + y * 7) % 7) - 3
-                r = max(0, min(255, ground_base[0] + noise))
-                g = max(0, min(255, ground_base[1] + noise * 2))
-                b = max(0, min(255, ground_base[2] + noise))
-                pixels[x, y] = (r, g, b, 255)
-
-        # Kamenné dlaždice
-        half = size // 2
-        for i in range(size):
-            pixels[i, 0] = ground_dark + (255,)
-            pixels[i, size-1] = ground_dark + (255,)
-            pixels[0, i] = ground_dark + (255,)
-            pixels[size-1, i] = ground_dark + (255,)
-            pixels[i, half] = ground_dark + (255,)
-            pixels[half, i] = ground_dark + (255,)
-
-        # Mechové skvrny
-        moss_spots = [(8, 8), (40, 12), (15, 42), (48, 45)]
-        for mx, my in moss_spots:
-            for dx in range(-2, 3):
-                for dy in range(-2, 3):
-                    px, py = mx + dx, my + dy
-                    if 0 <= px < size and 0 <= py < size:
-                        pixels[px, py] = moss + (255,)
-
-        # Svítivé kamínky
-        for gx, gy in [(20, 25), (50, 38), (10, 55), (45, 8)]:
-            if 0 <= gx < size and 0 <= gy < size:
-                pixels[gx, gy] = glow_green + (255,)
-                for ddx, ddy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                    nx, ny = gx + ddx, gy + ddy
-                    if 0 <= nx < size and 0 <= ny < size:
-                        pixels[nx, ny] = glow_dim + (255,)
-
-        # Malé kameny
-        for rx, ry in [(30, 15), (12, 30), (52, 52)]:
-            for dx in range(3):
-                for dy in range(2):
-                    px, py = rx + dx, ry + dy
-                    if 0 <= px < size and 0 <= py < size:
-                        pixels[px, py] = rock + (255,)
-
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_planet_sky_texture(size=64):
-        """Vytvoří pixel-art texturu oblohy mimozemské planety"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        pixels = img.load()
-
-        # Tmavě zeleno-fialová obloha
-        for y in range(size):
-            factor = y / size
-            r = int(25 + 35 * factor)
-            g = int(15 + 50 * factor)
-            b = int(45 + 30 * (1 - factor))
-            for x in range(size):
-                noise = ((x * 3 + y * 5) % 3) - 1
-                pixels[x, y] = (max(0, r + noise), max(0, g + noise), max(0, b + noise), 255)
-
-        # Cizí hvězdy - barevné
-        star_data = [(5, 8, (255, 200, 100)), (20, 3, (100, 255, 200)),
-                     (45, 15, (255, 100, 255)), (58, 6, (200, 255, 100)),
-                     (12, 50, (100, 200, 255)), (38, 45, (255, 255, 150)),
-                     (55, 55, (200, 150, 255))]
-        for sx, sy, sc in star_data:
-            if 0 <= sx < size and 0 <= sy < size:
-                pixels[sx, sy] = sc + (255,)
-
-        # Atmosférická čára dole
-        for x in range(size):
-            pixels[x, size - 1] = (60, 120, 50, 255)
-            pixels[x, size - 2] = (50, 100, 45, 255)
-
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_cc_floor_texture(size=64):
-        """Vytvoří pixel-art texturu podlahy řídícího centra"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        pixels = img.load()
-
-        base = (35, 40, 55)
-        light = (50, 55, 72)
-        dark = (25, 28, 42)
-        glow_blue = (30, 100, 200)
-        glow_dim = (20, 60, 120)
-
-        for y in range(size):
-            for x in range(size):
-                noise = ((x * 5 + y * 9) % 4) - 1
-                r = max(0, min(255, base[0] + noise))
-                g = max(0, min(255, base[1] + noise))
-                b = max(0, min(255, base[2] + noise))
-                pixels[x, y] = (r, g, b, 255)
-
-        # Mřížka
-        for i in range(size):
-            pixels[i, 0] = dark + (255,)
-            pixels[i, size-1] = dark + (255,)
-            pixels[0, i] = dark + (255,)
-            pixels[size-1, i] = dark + (255,)
-
-        # Středová světelná linka (modrá)
-        half = size // 2
-        for i in range(4, size - 4):
-            pixels[i, half] = glow_blue + (255,)
-            pixels[i, half - 1] = glow_dim + (255,)
-            pixels[i, half + 1] = glow_dim + (255,)
-
-        # Rohové indikátory
-        for cx, cy in [(4, 4), (size-6, 4), (4, size-6), (size-6, size-6)]:
-            pixels[cx, cy] = glow_blue + (255,)
-            pixels[cx+1, cy] = glow_blue + (255,)
-            pixels[cx, cy+1] = glow_blue + (255,)
-            pixels[cx+1, cy+1] = glow_dim + (255,)
-
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_cc_wall_texture(size=64):
-        """Vytvoří pixel-art texturu stěny řídícího centra"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        pixels = img.load()
-
-        base = (25, 30, 50)
-        light = (40, 45, 68)
-        dark = (15, 18, 35)
-        screen_bg = (5, 15, 30)
-        screen_glow = (20, 150, 255)
-        screen_data = (40, 200, 255)
-        indicator_red = (200, 40, 40)
-        indicator_green = (40, 200, 80)
-
-        for y in range(size):
-            for x in range(size):
-                noise = ((x * 7 + y * 3) % 3) - 1
-                r = max(0, min(255, base[0] + noise))
-                g = max(0, min(255, base[1] + noise))
-                b = max(0, min(255, base[2] + noise))
-                pixels[x, y] = (r, g, b, 255)
-
-        # Panel čáry
-        for x in range(size):
-            pixels[x, size // 4] = dark + (255,)
-            pixels[x, size // 4 + 1] = light + (255,)
-            pixels[x, 3 * size // 4] = dark + (255,)
-            pixels[x, 3 * size // 4 + 1] = light + (255,)
-
-        # Velká obrazovka uprostřed
-        scr_x, scr_y = 8, size // 4 + 5
-        scr_w, scr_h = size - 16, size // 3
-        for sy in range(scr_y, min(scr_y + scr_h, size)):
-            for sx in range(scr_x, min(scr_x + scr_w, size)):
-                pixels[sx, sy] = screen_bg + (255,)
-        # Data čáry
-        for row in range(4):
-            dy = scr_y + 3 + row * 5
-            length = scr_w - 8 - row * 6
-            for dx in range(scr_x + 3, min(scr_x + 3 + length, size)):
-                if dy < size:
-                    pixels[dx, dy] = screen_data + (255,)
-        # Glow okraj
-        for sx in range(scr_x - 1, min(scr_x + scr_w + 1, size)):
-            if scr_y - 1 >= 0 and sx >= 0:
-                pixels[sx, scr_y - 1] = screen_glow + (255,)
-            if scr_y + scr_h < size and sx >= 0:
-                pixels[sx, scr_y + scr_h] = screen_glow + (255,)
-
-        # Indikátory nahoře
-        for ix, color in [(10, indicator_green), (16, indicator_green), (22, indicator_red),
-                          (size - 12, indicator_green), (size - 18, indicator_red)]:
-            if 0 <= ix < size:
-                for dy in range(3):
-                    iy = 5 + dy
-                    if iy < size:
-                        pixels[ix, iy] = color + (255,)
-                        if ix + 1 < size:
-                            pixels[ix + 1, iy] = color + (255,)
-
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_village_ground_texture(size=64):
-        """Vytvoří pixel-art texturu země mimozemské vesnice"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        pixels = img.load()
-
-        path_base = (90, 70, 50)
-        path_light = (110, 88, 62)
-        path_dark = (65, 50, 38)
-        dirt = (75, 60, 42)
-        grass_alien = (60, 140, 80)
-        grass_dark = (40, 100, 55)
-        pebble = (120, 110, 95)
-        glow_purple = (140, 80, 200)
-        glow_dim = (90, 50, 130)
-
-        for y in range(size):
-            for x in range(size):
-                noise = ((x * 13 + y * 7) % 6) - 3
-                if (size // 3 - 3) < x < (2 * size // 3 + 3):
-                    r = max(0, min(255, path_base[0] + noise))
-                    g = max(0, min(255, path_base[1] + noise))
-                    b = max(0, min(255, path_base[2] + noise))
-                else:
-                    r = max(0, min(255, grass_alien[0] + noise * 2))
-                    g = max(0, min(255, grass_alien[1] + noise * 2))
-                    b = max(0, min(255, grass_alien[2] + noise))
-                pixels[x, y] = (r, g, b, 255)
-
-        for i in range(size):
-            for dx in [size // 3 - 3, 2 * size // 3 + 3]:
-                if 0 <= dx < size:
-                    pixels[dx, i] = path_dark + (255,)
-
-        for px, py in [(size // 2, 10), (size // 2 - 5, 30), (size // 2 + 4, 50)]:
-            if 0 <= px < size and 0 <= py < size:
-                pixels[px, py] = pebble + (255,)
-                if px + 1 < size:
-                    pixels[px + 1, py] = pebble + (255,)
-
-        for gx, gy in [(8, 15), (55, 40), (10, 50)]:
-            if 0 <= gx < size and 0 <= gy < size:
-                pixels[gx, gy] = glow_purple + (255,)
-                for ddx, ddy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                    nx, ny = gx + ddx, gy + ddy
-                    if 0 <= nx < size and 0 <= ny < size:
-                        pixels[nx, ny] = glow_dim + (255,)
-
-        for i in range(size):
-            pixels[i, 0] = path_dark + (255,)
-            pixels[i, size - 1] = path_dark + (255,)
-            pixels[0, i] = grass_dark + (255,)
-            pixels[size - 1, i] = grass_dark + (255,)
-
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_village_sky_texture(size=64):
-        """Vytvoří pixel-art texturu oblohy mimozemské vesnice"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        pixels = img.load()
-
-        for y in range(size):
-            factor = y / size
-            r = int(30 + 50 * factor)
-            g = int(15 + 30 * factor)
-            b = int(60 + 40 * (1 - factor))
-            for x in range(size):
-                noise = ((x * 5 + y * 3) % 3) - 1
-                pixels[x, y] = (max(0, r + noise), max(0, g + noise), max(0, b + noise), 255)
-
-        star_data = [(8, 5, (255, 180, 255)), (22, 10, (180, 255, 200)),
-                     (48, 8, (255, 255, 150)), (35, 18, (200, 180, 255)),
-                     (15, 45, (150, 255, 255)), (50, 50, (255, 200, 180)),
-                     (40, 30, (220, 220, 255))]
-        for sx, sy, sc in star_data:
-            if 0 <= sx < size and 0 <= sy < size:
-                pixels[sx, sy] = sc + (255,)
-
-        for x in range(size):
-            pixels[x, size - 1] = (50, 100, 60, 255)
-            pixels[x, size - 2] = (40, 80, 50, 255)
-
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_villager_texture(size=40):
-        """Vytvoří texturu mimozemského vesničana"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Tělo
-        draw.ellipse([size * 0.2, size * 0.35, size * 0.8, size * 0.9],
-                     fill=(100, 200, 120), outline=(60, 150, 80), width=2)
-        # Hlava
-        draw.ellipse([size * 0.25, size * 0.05, size * 0.75, size * 0.45],
-                     fill=(120, 220, 140), outline=(70, 170, 90), width=2)
-        # Oči (velké černé)
-        draw.ellipse([size * 0.3, size * 0.15, size * 0.45, size * 0.32],
-                     fill=(20, 20, 20), outline=(0, 0, 0))
-        draw.ellipse([size * 0.55, size * 0.15, size * 0.7, size * 0.32],
-                     fill=(20, 20, 20), outline=(0, 0, 0))
-        # Odlesky v očích
-        draw.ellipse([size * 0.34, size * 0.18, size * 0.39, size * 0.23],
-                     fill=(200, 255, 200))
-        draw.ellipse([size * 0.59, size * 0.18, size * 0.64, size * 0.23],
-                     fill=(200, 255, 200))
-        # Tykadla
-        draw.line([(size * 0.35, size * 0.08), (size * 0.25, size * 0.0)],
-                  fill=(100, 200, 120), width=2)
-        draw.line([(size * 0.65, size * 0.08), (size * 0.75, size * 0.0)],
-                  fill=(100, 200, 120), width=2)
-        draw.ellipse([size * 0.22, 0, size * 0.3, size * 0.06],
-                     fill=(255, 200, 100))
-        draw.ellipse([size * 0.72, 0, size * 0.8, size * 0.06],
-                     fill=(255, 200, 100))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_guard_texture(size=40):
-        """Vytvoří texturu mimozemského strážce"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Tělo (větší, robustnější)
-        draw.ellipse([size * 0.15, size * 0.3, size * 0.85, size * 0.95],
-                     fill=(80, 100, 180), outline=(50, 70, 140), width=2)
-        # Brnění
-        draw.rectangle([size * 0.25, size * 0.45, size * 0.75, size * 0.75],
-                       fill=(100, 120, 200), outline=(70, 90, 160), width=1)
-        # Hlava
-        draw.ellipse([size * 0.2, size * 0.02, size * 0.8, size * 0.42],
-                     fill=(90, 110, 190), outline=(60, 80, 150), width=2)
-        # Helma
-        draw.arc([size * 0.18, size * 0.0, size * 0.82, size * 0.35],
-                 start=180, end=360, fill=(150, 160, 200), width=3)
-        # Oči (červené)
-        draw.ellipse([size * 0.3, size * 0.14, size * 0.42, size * 0.26],
-                     fill=(255, 50, 50), outline=(200, 30, 30))
-        draw.ellipse([size * 0.58, size * 0.14, size * 0.7, size * 0.26],
-                     fill=(255, 50, 50), outline=(200, 30, 30))
-        # Kopí
-        draw.line([(size * 0.88, size * 0.1), (size * 0.88, size * 0.9)],
-                  fill=(180, 150, 80), width=2)
-        draw.polygon([(size * 0.83, size * 0.1), (size * 0.93, size * 0.1),
-                      (size * 0.88, size * 0.0)],
-                     fill=(200, 200, 220), outline=(150, 150, 170))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_child_texture(size=40):
-        """Vytvoří texturu mimozemského dítěte"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Malé kulaté tělo
-        draw.ellipse([size * 0.25, size * 0.4, size * 0.75, size * 0.9],
-                     fill=(150, 255, 170), outline=(100, 200, 120), width=1)
-        # Velká hlava (poměrně k tělu)
-        draw.ellipse([size * 0.2, size * 0.05, size * 0.8, size * 0.55],
-                     fill=(170, 255, 190), outline=(120, 220, 140), width=2)
-        # Obrovské oči
-        draw.ellipse([size * 0.25, size * 0.15, size * 0.45, size * 0.4],
-                     fill=(30, 30, 30), outline=(0, 0, 0))
-        draw.ellipse([size * 0.55, size * 0.15, size * 0.75, size * 0.4],
-                     fill=(30, 30, 30), outline=(0, 0, 0))
-        # Velké odlesky
-        draw.ellipse([size * 0.3, size * 0.18, size * 0.38, size * 0.28],
-                     fill=(220, 255, 220))
-        draw.ellipse([size * 0.6, size * 0.18, size * 0.68, size * 0.28],
-                     fill=(220, 255, 220))
-        # Malý úsměv
-        draw.arc([size * 0.35, size * 0.35, size * 0.65, size * 0.5],
-                 start=0, end=180, fill=(80, 160, 100), width=2)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_farmer_texture(size=40):
-        """Vytvoří texturu mimozemského farmáře"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Tělo
-        draw.ellipse([size * 0.2, size * 0.35, size * 0.8, size * 0.92],
-                     fill=(140, 180, 80), outline=(100, 140, 50), width=2)
-        # Zástěra
-        draw.rectangle([size * 0.3, size * 0.5, size * 0.7, size * 0.85],
-                       fill=(180, 160, 100), outline=(140, 120, 70), width=1)
-        # Hlava
-        draw.ellipse([size * 0.25, size * 0.05, size * 0.75, size * 0.45],
-                     fill=(150, 200, 90), outline=(110, 160, 60), width=2)
-        # Klobouk
-        draw.rectangle([size * 0.15, size * 0.08, size * 0.85, size * 0.18],
-                       fill=(160, 120, 50), outline=(120, 90, 30), width=1)
-        draw.rectangle([size * 0.3, size * 0.0, size * 0.7, size * 0.1],
-                       fill=(160, 120, 50), outline=(120, 90, 30), width=1)
-        # Oči
-        draw.ellipse([size * 0.33, size * 0.2, size * 0.43, size * 0.3],
-                     fill=(30, 30, 30))
-        draw.ellipse([size * 0.57, size * 0.2, size * 0.67, size * 0.3],
-                     fill=(30, 30, 30))
-        # Vidle (po straně)
-        draw.line([(size * 0.05, size * 0.2), (size * 0.05, size * 0.95)],
-                  fill=(140, 110, 50), width=2)
-        draw.line([(size * 0.0, size * 0.2), (size * 0.05, size * 0.28)],
-                  fill=(140, 110, 50), width=2)
-        draw.line([(size * 0.1, size * 0.2), (size * 0.05, size * 0.28)],
-                  fill=(140, 110, 50), width=2)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_merchant_texture(size=40):
-        """Vytvoří texturu mimozemského obchodníka"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        # Tělo (kulatější, bohatší)
-        draw.ellipse([size * 0.1, size * 0.3, size * 0.9, size * 0.95],
-                     fill=(200, 170, 80), outline=(160, 130, 50), width=2)
-        # Plášť
-        draw.polygon([(size * 0.15, size * 0.35), (size * 0.05, size * 0.9),
-                      (size * 0.95, size * 0.9), (size * 0.85, size * 0.35)],
-                     fill=(180, 50, 50), outline=(140, 30, 30), width=1)
-        # Hlava
-        draw.ellipse([size * 0.25, size * 0.02, size * 0.75, size * 0.4],
-                     fill=(220, 190, 100), outline=(180, 150, 70), width=2)
-        # Oči (lišácké, úzké)
-        draw.ellipse([size * 0.32, size * 0.16, size * 0.44, size * 0.24],
-                     fill=(20, 20, 20))
-        draw.ellipse([size * 0.56, size * 0.16, size * 0.68, size * 0.24],
-                     fill=(20, 20, 20))
-        # Vousy / chapadla
-        for i in range(3):
-            start_x = size * 0.5
-            start_y = size * 0.35
-            end_x = size * (0.3 + i * 0.15)
-            end_y = size * 0.5
-            draw.line([(start_x, start_y), (end_x, end_y)],
-                      fill=(180, 150, 70), width=1)
-        # Šperky
-        draw.ellipse([size * 0.42, size * 0.28, size * 0.58, size * 0.36],
-                     fill=(255, 220, 50), outline=(200, 170, 30))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_building_texture(size=50):
-        """Vytvoří texturu mimozemského baráku"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.rectangle([size*0.1, size*0.2, size*0.9, size*0.95],
-                       fill=(80, 60, 120), outline=(50, 35, 90), width=2)
-        for row in range(3):
-            for col in range(2):
-                wx = size*0.2 + col * size*0.35
-                wy = size*0.28 + row * size*0.2
-                draw.rectangle([wx, wy, wx + size*0.2, wy + size*0.12],
-                               fill=(150, 255, 200), outline=(100, 200, 150))
-        draw.arc([size*0.05, size*0.05, size*0.95, size*0.4],
-                 start=180, end=360, fill=(120, 80, 180), width=3)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_tower_texture(size=50):
-        """Vytvoří texturu mimozemské věže"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.rectangle([size*0.25, size*0.1, size*0.75, size*0.95],
-                       fill=(100, 80, 150), outline=(70, 50, 120), width=2)
-        draw.line([(size*0.5, size*0.1), (size*0.5, size*0.0)],
-                  fill=(200, 200, 220), width=2)
-        draw.ellipse([size*0.43, 0, size*0.57, size*0.06], fill=(255, 100, 100))
-        for i in range(4):
-            wy = size*0.2 + i * size*0.18
-            draw.ellipse([size*0.35, wy, size*0.65, wy + size*0.1],
-                         fill=(100, 255, 180), outline=(60, 200, 140))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_dome_texture(size=50):
-        """Vytvoří texturu mimozemské kupole"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.rectangle([size*0.05, size*0.6, size*0.95, size*0.95],
-                       fill=(90, 70, 130), outline=(60, 45, 100), width=2)
-        draw.ellipse([size*0.05, size*0.1, size*0.95, size*0.7],
-                     fill=(120, 100, 180), outline=(80, 60, 140), width=2)
-        draw.ellipse([size*0.4, size*0.15, size*0.6, size*0.35],
-                     fill=(200, 255, 220))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_alien_factory_texture(size=50):
-        """Vytvoří texturu mimozemské továrny"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.rectangle([size*0.05, size*0.3, size*0.95, size*0.95],
-                       fill=(70, 70, 90), outline=(45, 45, 65), width=2)
-        draw.rectangle([size*0.7, size*0.05, size*0.85, size*0.35],
-                       fill=(80, 80, 100), outline=(55, 55, 75), width=2)
-        draw.ellipse([size*0.65, size*0.0, size*0.9, size*0.15], fill=(150, 150, 160))
-        draw.rectangle([size*0.15, size*0.55, size*0.55, size*0.93],
-                       fill=(50, 50, 70), outline=(35, 35, 50))
-        draw.rectangle([size*0.65, size*0.4, size*0.85, size*0.5], fill=(255, 200, 100))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_mountain_chunk_texture(size=60):
-        """Vytvoří texturu kusu hory"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.polygon([(size*0.5, size*0.05), (size*0.0, size*0.95), (size, size*0.95)],
-                     fill=(100, 85, 70), outline=(70, 58, 45), width=2)
-        draw.polygon([(size*0.5, size*0.05), (size*0.35, size*0.3), (size*0.65, size*0.3)],
-                     fill=(220, 230, 240))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_giant_tree_texture(size=60):
-        """Vytvoří texturu obřího stromu"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.rectangle([size*0.4, size*0.5, size*0.6, size*0.95],
-                       fill=(90, 60, 30), outline=(60, 40, 20), width=2)
-        draw.ellipse([size*0.1, size*0.05, size*0.9, size*0.6],
-                     fill=(40, 140, 50), outline=(25, 100, 35), width=2)
-        draw.ellipse([size*0.25, size*0.15, size*0.7, size*0.45], fill=(60, 180, 70))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_giant_crystal_texture(size=60):
-        """Vytvoří texturu obřího krystalu"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.polygon([(size*0.5, size*0.0), (size*0.2, size*0.5), (size*0.35, size*0.95),
-                      (size*0.65, size*0.95), (size*0.8, size*0.5)],
-                     fill=(100, 180, 255), outline=(60, 120, 200), width=2)
-        draw.polygon([(size*0.5, size*0.1), (size*0.35, size*0.45), (size*0.5, size*0.7)],
-                     fill=(160, 220, 255))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_lake_texture(size=60):
-        """Vytvoří texturu jezera"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.05, size*0.2, size*0.95, size*0.8],
-                     fill=(40, 100, 180), outline=(30, 70, 140), width=2)
-        draw.ellipse([size*0.2, size*0.35, size*0.6, size*0.55], fill=(80, 160, 220))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_meteorite_texture(size=40):
-        """Vytvoří texturu meteoritu"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.1, size*0.1, size*0.9, size*0.9],
-                     fill=(120, 100, 80), outline=(80, 65, 50), width=2)
-        draw.ellipse([size*0.25, size*0.3, size*0.45, size*0.5], fill=(90, 75, 60))
-        draw.ellipse([size*0.55, size*0.5, size*0.75, size*0.7], fill=(90, 75, 60))
-        draw.arc([size*0.05, size*0.05, size*0.95, size*0.95],
-                 start=0, end=180, fill=(255, 150, 50), width=2)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_asteroid_texture(size=50):
-        """Vytvoří texturu asteroidu"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        points = [(size*0.5, size*0.05), (size*0.85, size*0.3),
-                  (size*0.9, size*0.7), (size*0.6, size*0.95),
-                  (size*0.2, size*0.85), (size*0.05, size*0.5),
-                  (size*0.15, size*0.2)]
-        draw.polygon(points, fill=(100, 90, 75), outline=(70, 60, 50), width=2)
-        draw.ellipse([size*0.3, size*0.3, size*0.5, size*0.5], fill=(80, 70, 58))
-        draw.ellipse([size*0.55, size*0.55, size*0.7, size*0.7], fill=(85, 75, 62))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_planet_food_texture(size=80):
-        """Vytvoří texturu planety ke sežrání"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
-                     fill=(60, 130, 60), outline=(40, 90, 40), width=2)
-        draw.ellipse([size*0.2, size*0.2, size*0.6, size*0.5], fill=(80, 160, 80))
-        draw.ellipse([size*0.5, size*0.45, size*0.8, size*0.7], fill=(80, 160, 80))
-        draw.arc([size*0.02, size*0.02, size*0.98, size*0.98],
-                 start=0, end=360, fill=(100, 200, 255), width=2)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_small_planet_texture(size=50):
-        """Vytvoří texturu malé planety"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
-                     fill=(180, 120, 60), outline=(140, 90, 40), width=2)
-        draw.ellipse([size*0.2, size*0.3, size*0.5, size*0.6], fill=(160, 100, 50))
-        draw.arc([size*0.02, size*0.02, size*0.98, size*0.98],
-                 start=0, end=360, fill=(200, 160, 100), width=1)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_gas_planet_texture(size=60):
-        """Vytvoří texturu plynného obra"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
-                     fill=(180, 140, 80), outline=(140, 100, 50), width=2)
-        for i in range(5):
-            y = size*0.2 + i * size*0.12
-            colors = [(200, 160, 90), (160, 120, 70), (190, 150, 85)]
-            draw.rectangle([size*0.1, y, size*0.9, y + size*0.06], fill=colors[i % 3])
-        draw.arc([int(size*-0.1), int(size*0.35), int(size*1.1), int(size*0.65)],
-                 start=0, end=360, fill=(200, 180, 140), width=2)
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_ice_planet_texture(size=50):
-        """Vytvoří texturu ledové planety"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
-                     fill=(160, 200, 240), outline=(120, 160, 200), width=2)
-        draw.ellipse([size*0.15, size*0.1, size*0.55, size*0.4], fill=(200, 230, 255))
-        draw.ellipse([size*0.4, size*0.5, size*0.8, size*0.8], fill=(180, 210, 240))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
-    @staticmethod
-    def create_lava_planet_texture(size=50):
-        """Vytvoří texturu lávové planety"""
-        img = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([size*0.05, size*0.05, size*0.95, size*0.95],
-                     fill=(180, 60, 20), outline=(140, 40, 10), width=2)
-        draw.arc([size*0.2, size*0.2, size*0.7, size*0.6],
-                 start=30, end=200, fill=(255, 180, 50), width=3)
-        draw.arc([size*0.4, size*0.5, size*0.9, size*0.85],
-                 start=0, end=160, fill=(255, 150, 30), width=2)
-        draw.ellipse([size*0.3, size*0.35, size*0.5, size*0.55], fill=(255, 200, 80))
-        return pygame.image.fromstring(img.tobytes(), img.size, 'RGBA')
-
 class TextureManager:
-    """Správa textur"""
+    """Správa textur - načítá PNG ze složky assets"""
+    TEXTURE_NAMES = [
+        "cat", "bug", "mouse", "container", "plant",
+        "lab_floor", "lab_wall", "chair", "screen", "keyboard",
+        "cable", "datapad", "cc_floor", "cc_wall",
+        "alien_mushroom", "alien_vine", "alien_crystal_flower",
+        "alien_bulb", "alien_tentacle_plant",
+        "planet_floor", "planet_sky", "village_ground", "village_sky",
+        "alien_villager", "alien_guard", "alien_child",
+        "alien_farmer", "alien_merchant",
+        "alien_building", "alien_tower", "alien_dome", "alien_factory",
+        "mountain_chunk", "giant_tree", "giant_crystal", "lake",
+        "meteorite", "asteroid", "planet_food",
+        "small_planet", "gas_planet", "ice_planet", "lava_planet",
+    ]
+
     def __init__(self):
         self.textures = {}
         self.assets_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
-        self.load_or_generate_textures()
-    
-    def load_or_generate_textures(self):
-        """Načte nebo vygeneruje textury"""
-        texture_configs = {
-            "cat": (100, TextureGenerator.create_cat_texture),
-            "bug": (20, TextureGenerator.create_bug_texture),
-            "mouse": (20, TextureGenerator.create_mouse_texture),
-            "container": (20, TextureGenerator.create_container_texture),
-            "plant": (20, TextureGenerator.create_plant_texture),
-            "lab_floor": (64, TextureGenerator.create_lab_floor_texture),
-            "lab_wall": (64, TextureGenerator.create_lab_wall_texture),
-            "chair": (40, TextureGenerator.create_chair_texture),
-            "screen": (40, TextureGenerator.create_screen_texture),
-            "keyboard": (40, TextureGenerator.create_keyboard_texture),
-            "cable": (30, TextureGenerator.create_cable_texture),
-            "datapad": (35, TextureGenerator.create_datapad_texture),
-            "cc_floor": (64, TextureGenerator.create_cc_floor_texture),
-            "cc_wall": (64, TextureGenerator.create_cc_wall_texture),
-            "alien_mushroom": (40, TextureGenerator.create_alien_mushroom_texture),
-            "alien_vine": (40, TextureGenerator.create_alien_vine_texture),
-            "alien_crystal_flower": (40, TextureGenerator.create_alien_crystal_flower_texture),
-            "alien_bulb": (40, TextureGenerator.create_alien_bulb_texture),
-            "alien_tentacle_plant": (40, TextureGenerator.create_alien_tentacle_plant_texture),
-            "planet_floor": (64, TextureGenerator.create_planet_floor_texture),
-            "planet_sky": (64, TextureGenerator.create_planet_sky_texture),
-            "village_ground": (64, TextureGenerator.create_village_ground_texture),
-            "village_sky": (64, TextureGenerator.create_village_sky_texture),
-            "alien_villager": (40, TextureGenerator.create_alien_villager_texture),
-            "alien_guard": (40, TextureGenerator.create_alien_guard_texture),
-            "alien_child": (40, TextureGenerator.create_alien_child_texture),
-            "alien_farmer": (40, TextureGenerator.create_alien_farmer_texture),
-            "alien_merchant": (40, TextureGenerator.create_alien_merchant_texture),
-            "alien_building": (50, TextureGenerator.create_alien_building_texture),
-            "alien_tower": (50, TextureGenerator.create_alien_tower_texture),
-            "alien_dome": (50, TextureGenerator.create_alien_dome_texture),
-            "alien_factory": (50, TextureGenerator.create_alien_factory_texture),
-            "mountain_chunk": (60, TextureGenerator.create_mountain_chunk_texture),
-            "giant_tree": (60, TextureGenerator.create_giant_tree_texture),
-            "giant_crystal": (60, TextureGenerator.create_giant_crystal_texture),
-            "lake": (60, TextureGenerator.create_lake_texture),
-            "meteorite": (40, TextureGenerator.create_meteorite_texture),
-            "asteroid": (50, TextureGenerator.create_asteroid_texture),
-            "planet_food": (80, TextureGenerator.create_planet_food_texture),
-            "small_planet": (50, TextureGenerator.create_small_planet_texture),
-            "gas_planet": (60, TextureGenerator.create_gas_planet_texture),
-            "ice_planet": (50, TextureGenerator.create_ice_planet_texture),
-            "lava_planet": (50, TextureGenerator.create_lava_planet_texture),
-        }
-        
-        # Vytvoř složku assets pokud neexistuje
-        if not os.path.exists(self.assets_path):
-            os.makedirs(self.assets_path)
-            print(f"[INFO] Vytvorena slozka assets: {self.assets_path}")
-        
-        for name, (size, generator_func) in texture_configs.items():
-            # Pokus se nahrát ze složky assets
+        self.load_textures()
+
+    def load_textures(self):
+        """Načte všechny textury z assets/"""
+        for name in self.TEXTURE_NAMES:
             path = os.path.join(self.assets_path, f"{name}.png")
             if os.path.exists(path):
                 try:
-                    texture = pygame.image.load(path).convert_alpha()
-                    self.textures[name] = texture
-                    print(f"[OK] Textura '{name}' nahrana ze souboru: {path}")
-                    continue
-                except:
-                    pass
-            
-            # Vygeneruj texturu a ulož do assets
-            try:
-                texture = generator_func(size)
-                self.textures[name] = texture
-                pygame.image.save(texture, path)
-                print(f"[OK] Textura '{name}' vygenerovana a ulozena do: {path}")
-            except Exception as e:
-                print(f"[CHYBA] Chyba pri generovani textury '{name}': {e}")
+                    self.textures[name] = pygame.image.load(path).convert_alpha()
+                except Exception as e:
+                    print(f"[CHYBA] Nelze nacist '{name}': {e}")
+                    self.textures[name] = None
+            else:
+                print(f"[CHYBA] Textura '{name}' nenalezena: {path}")
                 self.textures[name] = None
-    
+
     def get_texture(self, name):
         """Vrátí texturu"""
         return self.textures.get(name)
-    
+
     def scale_texture(self, name, width, height):
         """Vrátí zmenšenou texturu"""
         texture = self.get_texture(name)
@@ -1517,18 +352,21 @@ class Food:
                 screen.blit(scaled_texture, (self.x, self.y))
     
     def is_eaten_by(self, cat):
-        cat_left = cat.x - cat.size
-        cat_right = cat.x + cat.size
-        cat_top = cat.y - cat.size
-        cat_bottom = cat.y + cat.size
+        # Střed jídla
+        food_cx = self.x + self.width / 2
+        food_cy = self.y + self.height / 2
+        food_radius = min(self.width, self.height) * 0.3
         
-        food_left = self.x
-        food_right = self.x + self.width
-        food_top = self.y
-        food_bottom = self.y + self.height
+        # Kočka - střed je cat.x, cat.y, hodně zmenšený poloměr aby se musela opravdu dotknout
+        cat_radius = cat.size * 0.35
         
-        return not (food_right < cat_left or food_left > cat_right or 
-                   food_bottom < cat_top or food_top > cat_bottom)
+        # Vzdálenost středů
+        dx = cat.x - food_cx
+        dy = cat.y - food_cy
+        dist = math.sqrt(dx * dx + dy * dy)
+        
+        # Kolize nastane jen když se středy hodně přiblíží
+        return dist < (cat_radius + food_radius)
 
 class AlienCat:
     """Mimozemská kočka"""
@@ -1563,8 +401,9 @@ class AlienCat:
         self.x += self.vx
         self.y += self.vy
         
-        self.x = max(self.size, min(self.x, SCREEN_WIDTH - self.size))
-        self.y = max(self.size, min(self.y, SCREEN_HEIGHT - self.size))
+        # Omezení na okraj obrazovky (střed kočky nesmí přesáhnout okraj)
+        self.x = max(0, min(self.x, SCREEN_WIDTH))
+        self.y = max(0, min(self.y, SCREEN_HEIGHT))
         
         self.animation_counter += 1
         if self.vx != 0 or self.vy != 0:
@@ -3116,7 +1955,7 @@ class GameLevel6:
 
 
 class GameLevel7:
-    """Level 7 - Vesmír (jí meteority, na velikosti 40 sní planetu → 50)"""
+    """Level 7 - Vesmír (jí meteority, na velikosti 80 sní planetu → 120)"""
 
     def __init__(self, texture_manager):
         self.screen = pygame.display.get_surface()
@@ -3126,9 +1965,9 @@ class GameLevel7:
         self.texture_manager = texture_manager
 
         self.cat = AlienCat(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, texture_manager)
-        self.cat.size = 25
+        self.cat.size = 40
         self.cat.speed = 6
-        self.cat.max_size = 50
+        self.cat.max_size = 120
         self.cat.growth_per_food = 2
         self.foods = []
         self.planet_spawned = False
@@ -3141,13 +1980,13 @@ class GameLevel7:
                           random.random() * 2 + 0.5) for _ in range(150)]
 
     def spawn_food(self):
-        for _ in range(10):
+        for _ in range(15):
             x = random.randint(60, SCREEN_WIDTH - 60)
             y = random.randint(60, SCREEN_HEIGHT - 60)
             food_type = random.choice(["meteorite", "asteroid"])
             food = Food(x, y, food_type, self.texture_manager)
-            food.width = random.randint(30, 50)
-            food.height = random.randint(30, 50)
+            food.width = random.randint(30, 55)
+            food.height = random.randint(30, 55)
             self.foods.append(food)
 
     def spawn_planet(self):
@@ -3155,8 +1994,8 @@ class GameLevel7:
         x = random.randint(100, SCREEN_WIDTH - 100)
         y = random.randint(100, SCREEN_HEIGHT - 100)
         food = Food(x, y, "planet_food", self.texture_manager)
-        food.width = 100
-        food.height = 100
+        food.width = 140
+        food.height = 140
         self.foods.append(food)
         self.planet_spawned = True
 
@@ -3209,29 +2048,29 @@ class GameLevel7:
         self.screen.blit(size_text, (SCREEN_WIDTH - 350, 15))
 
         if not self.planet_eaten:
-            if self.cat.size >= 40:
+            if self.cat.size >= 80:
                 hint = font_small.render("! PLANETA SE OBJEVILA - SEŽER JI !", True, (255, 255, 100))
             else:
-                hint = font_small.render(f"Jez meteority! Na vel. 40 sníš planetu (nyní: {self.cat.size:.0f})", True, (180, 180, 255))
-            self.screen.blit(hint, (SCREEN_WIDTH - 500, 45))
+                hint = font_small.render(f"Jez meteority! Na vel. 80 sníš planetu (nyní: {self.cat.size:.0f})", True, (180, 180, 255))
+            self.screen.blit(hint, (SCREEN_WIDTH - 550, 45))
         else:
-            hint = font_small.render("Planeta sežrána! Velikost 50!", True, (100, 255, 100))
-            self.screen.blit(hint, (SCREEN_WIDTH - 350, 45))
+            hint = font_small.render("Planeta sežrána! Velikost 120!", True, (100, 255, 100))
+            self.screen.blit(hint, (SCREEN_WIDTH - 380, 45))
 
         # Progress bar k velikosti 40 (pak k 50)
         progress_width = 300
         progress_x = SCREEN_WIDTH - 350
         progress_y = 75
         pygame.draw.rect(self.screen, (15, 15, 40), (progress_x, progress_y, progress_width, 15))
-        if self.cat.size < 40:
-            filled = min(1.0, (self.cat.size - 25) / 15) * progress_width
+        if self.cat.size < 80:
+            filled = min(1.0, (self.cat.size - 40) / 40) * progress_width
             pygame.draw.rect(self.screen, (100, 100, 255), (progress_x, progress_y, filled, 15))
         else:
-            filled = min(1.0, (self.cat.size - 25) / 25) * progress_width
+            filled = min(1.0, (self.cat.size - 40) / 80) * progress_width
             pygame.draw.rect(self.screen, (100, 255, 100), (progress_x, progress_y, filled, 15))
         pygame.draw.rect(self.screen, (150, 150, 255), (progress_x, progress_y, progress_width, 15), 2)
-        # Značka na 40
-        mark_x = progress_x + int((15 / 25) * progress_width)
+        # Značka na 80
+        mark_x = progress_x + int((40 / 80) * progress_width)
         pygame.draw.line(self.screen, (255, 255, 100), (mark_x, progress_y - 3), (mark_x, progress_y + 18), 2)
 
         controls_text = font_small.render("WASD nebo Šipky = Pohyb | ESC = Zpět", True, (100, 100, 140))
@@ -3254,18 +2093,18 @@ class GameLevel7:
             if food.eaten:
                 continue
             if food.food_type == "planet_food":
-                # Planetu lze sníst jen při velikosti >= 40
-                if self.cat.size >= 40 and food.is_eaten_by(self.cat):
+                # Planetu lze sníst jen při velikosti >= 80
+                if self.cat.size >= 80 and food.is_eaten_by(self.cat):
                     food.eaten = True
-                    self.cat.size = 50
+                    self.cat.size = 120
                     self.cat.food_eaten += 1
                     self.planet_eaten = True
             else:
                 if food.is_eaten_by(self.cat):
                     self.cat.eat_food(food)
 
-        # Spawn planety když kočka >= 40
-        if self.cat.size >= 40 and not self.planet_spawned:
+        # Spawn planety když kočka >= 80
+        if self.cat.size >= 80 and not self.planet_spawned:
             self.spawn_planet()
 
         # Win: kočka sežrala planetu (velikost >= 50)
@@ -3275,7 +2114,7 @@ class GameLevel7:
             return
 
         alive_foods = sum(1 for f in self.foods if not f.eaten and f.food_type != "planet_food")
-        if alive_foods < 5:
+        if alive_foods < 8:
             self.spawn_food()
 
     def draw(self):
@@ -3472,6 +2311,214 @@ class GameLevel8:
             self.draw()
             self.clock.tick(FPS)
         return "won" if self.won else "quit"
+
+
+class ExplosionCutscene:
+    """Cutscéna - kočka se přejedla a vybouchla"""
+    def __init__(self, texture_manager):
+        self.screen = pygame.display.get_surface()
+        self.clock = pygame.time.Clock()
+        self.texture_manager = texture_manager
+        self.timer = 0
+        self.phase = "growing"  # growing -> shake -> explode -> text
+        self.cat_size = 200
+        self.shake_offset = [0, 0]
+        self.particles = []
+        self.flash_alpha = 0
+        self.stars = [(random.randint(0, SCREEN_WIDTH), random.randint(0, SCREEN_HEIGHT),
+                       random.random() * 2 + 0.5) for _ in range(100)]
+        self.star_timer = 0
+        self.text_alpha = 0
+        self.font_big = pygame.font.Font(None, 100)
+        self.font_medium = pygame.font.Font(None, 60)
+        self.font_small = pygame.font.Font(None, 40)
+        self.font_hint = pygame.font.Font(None, 30)
+        # Barvy částic exploze
+        self.particle_colors = [
+            (255, 100, 50), (255, 180, 30), (255, 60, 60),
+            (80, 180, 100), (120, 220, 140), (60, 255, 80),
+            (255, 255, 100), (255, 200, 50), (200, 80, 200)
+        ]
+
+    def spawn_explosion_particles(self):
+        cx, cy = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 30
+        for _ in range(200):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(2, 15)
+            size = random.randint(3, 20)
+            color = random.choice(self.particle_colors)
+            life = random.randint(60, 180)
+            self.particles.append({
+                'x': cx, 'y': cy,
+                'vx': math.cos(angle) * speed,
+                'vy': math.sin(angle) * speed,
+                'size': size, 'color': color,
+                'life': life, 'max_life': life,
+                'rotation': random.uniform(0, 360),
+                'rot_speed': random.uniform(-5, 5)
+            })
+
+    def update(self):
+        self.timer += 1
+        self.star_timer += 0.02
+
+        if self.phase == "growing":
+            # Kočka roste a nafoukne se
+            self.cat_size = 200 + self.timer * 1.5
+            if self.cat_size > 450:
+                self.phase = "shake"
+                self.timer = 0
+
+        elif self.phase == "shake":
+            # Kočka se třese
+            intensity = min(self.timer / 30, 1.0) * 15
+            self.shake_offset[0] = random.uniform(-intensity, intensity)
+            self.shake_offset[1] = random.uniform(-intensity, intensity)
+            # Kočka pulzuje
+            self.cat_size = 450 + math.sin(self.timer * 0.5) * 20
+            if self.timer > 90:
+                self.phase = "explode"
+                self.timer = 0
+                self.spawn_explosion_particles()
+                self.flash_alpha = 255
+
+        elif self.phase == "explode":
+            self.flash_alpha = max(0, self.flash_alpha - 8)
+            # Update částic
+            for p in self.particles:
+                p['x'] += p['vx']
+                p['y'] += p['vy']
+                p['vy'] += 0.05  # gravitace
+                p['vx'] *= 0.99
+                p['life'] -= 1
+                p['rotation'] += p['rot_speed']
+            self.particles = [p for p in self.particles if p['life'] > 0]
+            if self.timer > 120:
+                self.phase = "text"
+                self.timer = 0
+
+        elif self.phase == "text":
+            self.text_alpha = min(255, self.text_alpha + 3)
+            # Částice stále padají
+            for p in self.particles:
+                p['x'] += p['vx']
+                p['y'] += p['vy']
+                p['vy'] += 0.05
+                p['life'] -= 1
+                p['rotation'] += p['rot_speed']
+            self.particles = [p for p in self.particles if p['life'] > 0]
+
+    def draw_background(self):
+        for y in range(SCREEN_HEIGHT):
+            r = int(5 + 10 * (y / SCREEN_HEIGHT))
+            g = int(3 + 8 * (y / SCREEN_HEIGHT))
+            b = int(15 + 20 * (1 - y / SCREEN_HEIGHT))
+            pygame.draw.line(self.screen, (r, g, b), (0, y), (SCREEN_WIDTH, y))
+        for sx, sy, br in self.stars:
+            alpha = int(80 + 80 * math.sin(self.star_timer * br))
+            alpha = max(0, min(255, alpha))
+            self.screen.set_at((int(sx), int(sy)), (alpha, alpha, min(255, alpha + 20)))
+
+    def draw(self):
+        self.draw_background()
+        cx, cy = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 30
+
+        if self.phase in ("growing", "shake"):
+            # Kresli kočku (nafouklou)
+            cat_texture = self.texture_manager.get_texture("cat")
+            if cat_texture:
+                sx = int(self.cat_size + self.shake_offset[0])
+                sy = int(self.cat_size + self.shake_offset[1])
+                scaled = pygame.transform.scale(cat_texture, (sx, sy))
+                rect = scaled.get_rect(center=(cx, cy))
+                self.screen.blit(scaled, rect)
+
+            # Červená záře při třásní
+            if self.phase == "shake":
+                glow_alpha = int(40 + 30 * math.sin(self.timer * 0.3))
+                glow_r = int(self.cat_size * 0.7)
+                glow_surf = pygame.Surface((glow_r * 2, glow_r * 2), pygame.SRCALPHA)
+                pygame.draw.circle(glow_surf, (255, 50, 30, glow_alpha), (glow_r, glow_r), glow_r)
+                self.screen.blit(glow_surf, (cx - glow_r, cy - glow_r))
+
+            # Varovný text
+            if self.phase == "growing":
+                warn = self.font_small.render("Kočka se přejídá...", True, (255, 200, 100))
+                self.screen.blit(warn, warn.get_rect(center=(cx, cy + self.cat_size // 2 + 40)))
+            elif self.phase == "shake":
+                blink = int(self.timer * 0.3) % 2 == 0
+                if blink:
+                    warn = self.font_medium.render("! POZOR !", True, (255, 50, 50))
+                    self.screen.blit(warn, warn.get_rect(center=(cx, cy + self.cat_size // 2 + 40)))
+
+        elif self.phase in ("explode", "text"):
+            # Částice
+            for p in self.particles:
+                alpha = int(255 * (p['life'] / p['max_life']))
+                alpha = max(0, min(255, alpha))
+                size = max(1, int(p['size'] * (p['life'] / p['max_life'])))
+                surf = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
+                color = (*p['color'], alpha)
+                pygame.draw.circle(surf, color, (size, size), size)
+                rotated = pygame.transform.rotate(surf, p['rotation'])
+                self.screen.blit(rotated, (int(p['x']) - size, int(p['y']) - size))
+
+            # Bílý flash
+            if self.flash_alpha > 0:
+                flash = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+                flash.fill((255, 255, 255, self.flash_alpha))
+                self.screen.blit(flash, (0, 0))
+
+            # Texty po explozi
+            if self.phase == "text":
+                # BOOM!
+                boom_color = (255, max(0, 100 - self.timer), max(0, 50 - self.timer))
+                boom = self.font_big.render("BOOM!", True, boom_color)
+                self.screen.blit(boom, boom.get_rect(center=(cx, 150)))
+
+                # Hlavní text
+                if self.text_alpha > 50:
+                    txt_surf = pygame.Surface((700, 250), pygame.SRCALPHA)
+                    lines = [
+                        ("Kočka se přejedla...", self.font_medium, (255, 200, 100)),
+                        ("a VYBOUCHLA!", self.font_medium, (255, 80, 60)),
+                        ("", None, None),
+                        ("Snědla celý vesmír.", self.font_small, (180, 180, 255)),
+                        ("A pak i sebe.", self.font_small, (150, 255, 150)),
+                    ]
+                    y_off = 0
+                    for text, font, color in lines:
+                        if font is None:
+                            y_off += 15
+                            continue
+                        a = min(self.text_alpha, 255)
+                        rendered = font.render(text, True, (*color,))
+                        rendered.set_alpha(a)
+                        r = rendered.get_rect(center=(350, y_off + rendered.get_height() // 2))
+                        txt_surf.blit(rendered, r)
+                        y_off += rendered.get_height() + 8
+                    self.screen.blit(txt_surf, (cx - 350, 280))
+
+                if self.text_alpha > 200:
+                    hint = self.font_hint.render("Stiskni ENTER nebo ESC", True, (120, 120, 150))
+                    self.screen.blit(hint, hint.get_rect(center=(cx, SCREEN_HEIGHT - 50)))
+
+        pygame.display.flip()
+
+    def run(self):
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return "quit"
+                if event.type == pygame.KEYDOWN:
+                    if self.phase == "text" and self.text_alpha > 150:
+                        if event.key in (pygame.K_RETURN, pygame.K_SPACE, pygame.K_ESCAPE):
+                            return "menu"
+            self.update()
+            self.draw()
+            self.clock.tick(FPS)
+        return "menu"
 
 
 class LevelComplete:
@@ -4232,7 +3279,10 @@ if __name__ == "__main__":
             if result == "won":
                 lc = LevelComplete(texture_manager, "Požírač Planet", game8.cat.food_eaten)
                 lc_result = lc.run()
-                state = "levels" if lc_result == "levels" else "quit"
+                # Po dokončení posledního levelu - cutscéna s explozí
+                cutscene = ExplosionCutscene(texture_manager)
+                cutscene.run()
+                state = "menu"
             else:
                 state = "levels"
     
